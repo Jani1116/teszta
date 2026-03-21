@@ -8,40 +8,31 @@
         :root {
             --bg: #000; --card: #1c1c1e; --text: #fff;
             --accent: #007aff; --border: #2c2c2e; --danger: #ff453a; 
-            --zebra: #1a2a3a; /* Halvány kék a soroknak */
+            --zebra: #1a2a3a;
         }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; }
         
-        /* Fejléc */
         .header { position: sticky; top: 0; background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid var(--border); z-index: 100; }
         .add-btn { position: absolute; right: 20px; font-size: 28px; color: var(--accent); cursor: pointer; }
-        .back-btn { position: absolute; left: 20px; color: var(--accent); cursor: pointer; font-size: 16px; }
+        .back-btn { position: absolute; left: 20px; color: var(--accent); cursor: pointer; }
 
         .container { padding: 15px; max-width: 600px; margin: auto; padding-bottom: 220px; }
         
-        /* Táblázat és Oszlopok */
         .list-row { display: grid; padding: 10px 5px; border-bottom: 1px solid var(--border); align-items: center; gap: 8px; }
         .list-row:nth-child(even) { background-color: var(--zebra); }
         
-        /* Oszlop igazítások */
         .grid-main { grid-template-columns: 1fr; }
         .grid-recipe { grid-template-columns: 2fr 1fr 45px; }
         .grid-calc { grid-template-columns: 2fr 1fr 1fr 45px; }
 
-        .data-btn { background: var(--card); border: 1px solid var(--border); color: #fff; padding: 12px 8px; border-radius: 8px; text-align: left; font-size: 14px; min-height: 44px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .data-btn { background: var(--card); border: 1px solid var(--border); color: #fff; padding: 12px 8px; border-radius: 8px; text-align: left; font-size: 14px; min-height: 44px; }
         .num-val { text-align: center; font-weight: bold; }
+        .row-op { background: none; border: none; color: var(--danger); font-size: 24px; cursor: pointer; }
 
-        /* Műveleti gombok a sor végén */
-        .row-op { background: none; border: none; color: var(--danger); font-size: 20px; font-weight: bold; cursor: pointer; }
-        .row-add { color: var(--accent); }
+        .summary-panel { position: fixed; bottom: 0; width: 100%; background: #0a0a0a; border-top: 2px solid var(--accent); padding: 15px; box-sizing: border-box; min-height: 100px; max-height: 200px; overflow-y: auto; z-index: 200; }
+        .summary-title { font-weight: bold; color: var(--accent); border-bottom: 1px solid var(--border); margin-bottom: 8px; padding-bottom: 5px; }
+        .summary-item { display: grid; grid-template-columns: 1fr 1fr; font-family: monospace; padding: 4px 0; font-size: 16px; }
 
-        /* Összesítő panel */
-        .summary-panel { position: fixed; bottom: 0; width: 100%; background: #0a0a0a; border-top: 2px solid var(--accent); padding: 15px; box-sizing: border-box; max-height: 200px; overflow-y: auto; z-index: 200; }
-        .summary-title { font-weight: bold; color: var(--accent); border-bottom: 1px solid var(--border); margin-bottom: 8px; padding-bottom: 5px; font-size: 14px; }
-        .summary-item { display: grid; grid-template-columns: 1fr 1fr; font-family: 'Courier New', monospace; padding: 4px 0; font-size: 15px; }
-        .summary-item:nth-child(even) { color: #add8e6; }
-
-        /* Modern Modal */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: var(--card); padding: 25px; border-radius: 24px; width: 85%; max-width: 320px; text-align: center; border: 1px solid var(--border); }
         
@@ -49,7 +40,6 @@
         
         .btn { width: 100%; padding: 15px; border-radius: 14px; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; font-size: 16px; }
         .btn-primary { background: var(--accent); color: white; }
-        .btn-option { background: #3a3a3c; color: white; }
         .btn-danger { color: var(--danger); background: none; border: 1px solid var(--danger); }
         
         .hidden { display: none; }
@@ -60,7 +50,7 @@
 <div class="header">
     <div id="back-btn" class="back-btn hidden" onclick="goHome()">❮ Vissza</div>
     <h1 id="title">TÉSZTA</h1>
-    <div class="add-btn" onclick="headerAdd()">+</div>
+    <div class="add-btn" onclick="openAddModal()">+</div>
 </div>
 
 <div id="view-main" class="container">
@@ -76,173 +66,183 @@
     <div class="modal-content">
         <h3 id="modal-label">Módosítás</h3>
         <input type="text" id="edit-input">
-        <button class="btn btn-primary" onclick="confirmEdit()">OKÉ</button>
+        <button class="btn btn-primary" onclick="confirmAction()">OKÉ</button>
         <button class="btn" onclick="closeModal('edit-modal')">Mégse</button>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal">
+    <div class="modal-content">
+        <h3>Biztos?</h3>
+        <p id="confirm-text"></p>
+        <button class="btn btn-primary" id="confirm-ok">IGEN</button>
+        <button class="btn" onclick="closeModal('confirm-modal')">Mégse</button>
     </div>
 </div>
 
 <div id="options-modal" class="modal">
     <div class="modal-content">
-        <h3 id="opt-pasta-name" style="margin-bottom:20px">Opciók</h3>
-        <button class="btn btn-option" onclick="handleOption('rename')">Átnevezés</button>
-        <button class="btn btn-option" style="color:var(--accent)" onclick="handleOption('recipe')">Szerkesztés (Recept)</button>
-        <button class="btn btn-danger" onclick="handleOption('delete')">Törlés</button>
-        <button class="btn" onclick="closeModal('options-modal')" style="margin-top:20px">Mégse</button>
+        <h3 id="opt-title">Opciók</h3>
+        <button class="btn btn-primary" onclick="startRename()">Átnevezés</button>
+        <button class="btn btn-primary" style="background:#5856d6" onclick="goToRecipe()">Szerkesztés (Recept)</button>
+        <button class="btn btn-danger" onclick="askDeletePasta()">Törlés</button>
+        <button class="btn" onclick="closeModal('options-modal')">Vissza</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('teszta_pro_db')) || {};
-    let state = { view: 'main', activeId: null, editTarget: null };
+    let db = JSON.parse(localStorage.getItem('teszta_v3')) || {};
+    let state = { view: 'main', activeId: null, pendingAction: null };
     let pressTimer;
 
     function save() {
-        localStorage.setItem('teszta_pro_db', JSON.stringify(db));
+        localStorage.setItem('teszta_v3', JSON.stringify(db));
         render();
     }
 
     function render() {
-        const mainView = document.getElementById('view-main');
-        const detailView = document.getElementById('view-details');
-        const backBtn = document.getElementById('back-btn');
+        const list = document.getElementById('pasta-list');
+        const container = document.getElementById('rows-container');
         const summary = document.getElementById('summary-panel');
         
         if (state.view === 'main') {
-            backBtn.classList.add('hidden');
+            document.getElementById('back-btn').classList.add('hidden');
             summary.classList.add('hidden');
-            mainView.classList.remove('hidden');
-            detailView.classList.add('hidden');
+            document.getElementById('view-main').classList.remove('hidden');
+            document.getElementById('view-details').classList.add('hidden');
             document.getElementById('title').innerText = "TÉSZTA";
-            
-            const list = document.getElementById('pasta-list');
             list.innerHTML = '';
             Object.keys(db).forEach(id => {
                 const div = document.createElement('div');
                 div.className = 'list-row grid-main';
                 div.innerHTML = `<button class="data-btn" onclick="openCalc('${id}')">${db[id].name}</button>`;
-                
-                // Hosszú nyomás kezelés
-                div.onmousedown = div.ontouchstart = () => pressTimer = setTimeout(() => showOptions(id), 600);
-                div.onmouseup = div.ontouchend = () => clearTimeout(pressTimer);
-                
+                div.ontouchstart = () => pressTimer = setTimeout(() => openOptions(id), 600);
+                div.ontouchend = () => clearTimeout(pressTimer);
                 list.appendChild(div);
             });
         } else {
-            backBtn.classList.remove('hidden');
-            mainView.classList.add('hidden');
-            detailView.classList.remove('hidden');
+            document.getElementById('back-btn').classList.remove('hidden');
+            document.getElementById('view-main').classList.add('hidden');
+            document.getElementById('view-details').classList.remove('hidden');
             const p = db[state.activeId];
-            const container = document.getElementById('rows-container');
             container.innerHTML = '';
 
             if (state.view === 'recipe') {
                 document.getElementById('title').innerText = p.name + " %";
                 summary.classList.add('hidden');
                 p.recipe.forEach((ing, idx) => {
-                    container.innerHTML += `
-                        <div class="list-row grid-recipe">
-                            <button class="data-btn" onclick="openEdit('recipe', ${idx}, 'name')">${ing.name}</button>
-                            <button class="data-btn num-val" onclick="openEdit('recipe', ${idx}, 'perc')">${ing.perc}%</button>
-                            <button class="row-op" onclick="removeRow(${idx})">−</button>
-                        </div>`;
+                    container.innerHTML += `<div class="list-row grid-recipe">
+                        <button class="data-btn" onclick="askEdit('recipe',${idx},'name')">${ing.name}</button>
+                        <button class="data-btn num-val" onclick="askEdit('recipe',${idx},'perc')">${ing.perc}%</button>
+                        <button class="row-op" onclick="askDeleteRow(${idx})">−</button>
+                    </div>`;
                 });
             } else {
                 document.getElementById('title').innerText = p.name;
                 summary.classList.remove('hidden');
-                p.items.forEach((item, idx) => {
-                    container.innerHTML += `
-                        <div class="list-row grid-calc">
-                            <button class="data-btn" onclick="openEdit('items', ${idx}, 'name')">${item.name}</button>
-                            <button class="data-btn num-val" onclick="openEdit('items', ${idx}, 'suly')">${item.suly} dkg</button>
-                            <button class="data-btn num-val" onclick="openEdit('items', ${idx}, 'db')">${item.db} db</button>
-                            <button class="row-op" onclick="removeRow(${idx})">−</button>
-                        </div>`;
+                p.items.forEach((it, idx) => {
+                    container.innerHTML += `<div class="list-row grid-calc">
+                        <button class="data-btn" onclick="askEdit('items',${idx},'name')">${it.name}</button>
+                        <button class="data-btn num-val" onclick="askEdit('items',${idx},'suly')">${it.suly} dkg</button>
+                        <button class="data-btn num-val" onclick="askEdit('items',${idx},'db')">${it.db} db</button>
+                        <button class="row-op" onclick="askDeleteRow(${idx})">−</button>
+                    </div>`;
                 });
                 doCalc();
             }
         }
     }
 
-    function headerAdd() {
-        if (state.view === 'main') {
-            const n = prompt("Tészta neve:");
-            if (n) {
-                const id = Date.now();
-                db[id] = { name: n, recipe: [{name: 'Liszt', perc: 100}], items: [] };
-                save();
-            }
-        } else if (state.view === 'recipe') {
-            db[state.activeId].recipe.push({name: 'Új összetevő', perc: 0});
-            save();
-        } else {
-            db[state.activeId].items.push({name: 'Új típus', suly: 0, db: 0});
-            save();
-        }
-    }
-
-    function showOptions(id) {
-        state.activeId = id;
-        document.getElementById('opt-pasta-name').innerText = db[id].name;
-        document.getElementById('options-modal').style.display = 'flex';
-    }
-
-    function handleOption(type) {
-        closeModal('options-modal');
-        if (type === 'rename') {
-            const n = prompt("Új név:", db[state.activeId].name);
-            if (n) db[state.activeId].name = n;
-        } else if (type === 'recipe') {
-            state.view = 'recipe';
-        } else if (type === 'delete') {
-            if (confirm("Biztosan törlöd a teljes tésztát?")) delete db[state.activeId];
-        }
-        save();
-    }
-
-    function openEdit(list, idx, field) {
-        state.editTarget = { list, idx, field };
-        const val = db[state.activeId][list][idx][field];
-        document.getElementById('edit-input').value = val;
+    // MODAL KEZELÉS (Fehér ablakok helyett)
+    function openAddModal() {
+        state.pendingAction = 'add_new';
+        document.getElementById('modal-label').innerText = "Új hozzáadása";
+        document.getElementById('edit-input').value = "";
         document.getElementById('edit-modal').style.display = 'flex';
     }
 
-    function confirmEdit() {
-        const val = document.getElementById('edit-input').value;
-        if (confirm("Megváltoztatod?")) {
-            const t = state.editTarget;
-            db[state.activeId][t.list][t.idx][t.field] = val;
-            closeModal('edit-modal');
-            save();
-        }
+    function askEdit(list, idx, field) {
+        state.pendingAction = { type: 'edit', list, idx, field };
+        document.getElementById('modal-label').innerText = "Módosítás";
+        document.getElementById('edit-input').value = db[state.activeId][list][idx][field];
+        document.getElementById('edit-modal').style.display = 'flex';
     }
 
-    function removeRow(idx) {
-        if (confirm("Tényleg törlöd a sort?")) {
+    function confirmAction() {
+        const val = document.getElementById('edit-input').value;
+        if (!val) return;
+
+        openConfirm("Végrehajtod a változtatást?", () => {
+            if (state.pendingAction === 'add_new') {
+                if (state.view === 'main') {
+                    const id = Date.now();
+                    db[id] = { name: val, recipe: [{name: 'Liszt', perc: 100}], items: [] };
+                } else if (state.view === 'recipe') {
+                    db[state.activeId].recipe.push({name: val, perc: 0});
+                } else {
+                    db[state.activeId].items.push({name: val, suly: 0, db: 0});
+                }
+            } else if (state.pendingAction.type === 'edit') {
+                const a = state.pendingAction;
+                db[state.activeId][a.list][a.idx][a.field] = val;
+            } else if (state.pendingAction === 'rename') {
+                db[state.activeId].name = val;
+            }
+            closeModal('edit-modal');
+            save();
+        });
+    }
+
+    function openConfirm(text, callback) {
+        document.getElementById('confirm-text').innerText = text;
+        document.getElementById('confirm-modal').style.display = 'flex';
+        document.getElementById('confirm-ok').onclick = () => {
+            callback();
+            closeModal('confirm-modal');
+        };
+    }
+
+    function askDeleteRow(idx) {
+        openConfirm("Tényleg törlöd ezt a sort?", () => {
             const list = state.view === 'recipe' ? 'recipe' : 'items';
             db[state.activeId][list].splice(idx, 1);
             save();
-        }
+        });
     }
 
+    function askDeletePasta() {
+        openConfirm("Törlöd a teljes tésztát?", () => {
+            delete db[state.activeId];
+            closeModal('options-modal');
+            state.view = 'main';
+            save();
+        });
+    }
+
+    // SZÁMÍTÁS JAVÍTÁSA
     function doCalc() {
         const p = db[state.activeId];
         let totalDkg = 0;
-        p.items.forEach(i => totalDkg += (parseFloat(i.suly) * parseInt(i.db)));
+        p.items.forEach(i => totalDkg += (Number(i.suly) * Number(i.db)));
         
         let totalKg = totalDkg / 100;
         let totalPerc = 0;
-        p.recipe.forEach(r => totalPerc += parseFloat(r.perc));
+        p.recipe.forEach(r => totalPerc += Number(r.perc));
         
-        let lisztBase = (totalKg / totalPerc) * 100;
+        let lisztBase = totalPerc > 0 ? (totalKg / totalPerc) * 100 : 0;
 
         let html = `<div class="summary-title">ÖSSZETÉTEL (${totalKg.toFixed(2)} kg tészta)</div>`;
         p.recipe.forEach(ing => {
-            let kg = (lisztBase * (parseFloat(ing.perc) / 100));
+            let kg = (lisztBase * (Number(ing.perc) / 100));
             html += `<div class="summary-item"><span>${ing.name}</span> <span style="text-align:right">${kg.toFixed(3)} kg</span></div>`;
         });
         document.getElementById('summary-panel').innerHTML = html;
     }
 
+    // NAVIGÁCIÓ
+    function openOptions(id) { state.activeId = id; document.getElementById('opt-title').innerText = db[id].name; document.getElementById('options-modal').style.display = 'flex'; }
+    function startRename() { state.pendingAction = 'rename'; document.getElementById('modal-label').innerText = "Átnevezés"; document.getElementById('edit-input').value = db[state.activeId].name; closeModal('options-modal'); document.getElementById('edit-modal').style.display = 'flex'; }
+    function goToRecipe() { state.view = 'recipe'; closeModal('options-modal'); render(); }
     function openCalc(id) { state.activeId = id; state.view = 'calc'; render(); }
     function goHome() { state.view = 'main'; render(); }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
