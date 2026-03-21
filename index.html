@@ -3,216 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Toolbox 2026 Pro</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-    <script defer src="https://unpkg.com/mathlive"></script>
+    <title>TÉSZTA - Admin</title>
     <style>
         :root {
-            --bg: #000; --card: #1c1c1e; --accent: #0a84ff; --text: #fff; 
-            --gray: #8e8e93; --border: #38383a; --input-bg: #2c2c2e;
+            --bg: #000000; --card: #1c1c1e; --text: #ffffff;
+            --accent: #007aff; --border: #2c2c2e; --danger: #ff453a;
         }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; overflow-x: hidden; }
-        .container { max-width: 700px; margin: auto; background: var(--card); border-radius: 20px; padding: 20px; min-height: 94vh; display: flex; flex-direction: column; border: 1px solid var(--border); box-sizing: border-box; }
-        .hidden { display: none !important; }
-        h2 { text-align: center; margin: 10px 0 20px 0; font-weight: 600; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); overflow-x: hidden; }
         
-        .main-btn { background: var(--input-bg); color: white; border: none; padding: 20px; border-radius: 15px; margin: 8px 0; font-size: 18px; cursor: pointer; width: 100%; display: flex; justify-content: space-between; align-items: center; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .btn-3d { background: #333; border: none; border-radius: 12px; color: white; font-size: 20px; font-weight: bold; padding: 18px 0; cursor: pointer; }
-        .btn-op { color: var(--accent); }
-        .btn-eq { background: var(--accent); }
+        /* Fejléc */
+        .header { position: sticky; top: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); padding: 15px 20px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid var(--border); z-index: 100; }
+        .header h1 { margin: 0; font-size: 24px; letter-spacing: 2px; }
+        .add-btn { position: absolute; right: 20px; font-size: 30px; color: var(--accent); cursor: pointer; user-select: none; }
 
-        math-field { font-size: 32px; background: #111; border: 1px solid var(--border); border-radius: 12px; color: white; padding: 15px; margin-bottom: 5px; width: 100%; outline: none; }
+        /* Lista */
+        .list-container { padding: 15px; display: flex; flex-direction: column; gap: 10px; max-height: calc(100vh - 70px); overflow-y: auto; }
+        .pasta-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); font-size: 18px; text-align: center; transition: 0.2s; -webkit-touch-callout: none; user-select: none; }
+        .pasta-card:active { transform: scale(0.98); background: #2c2c2e; }
 
-        #history-panel { background: #111; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 15px; font-size: 14px; color: var(--gray); max-height: 100px; overflow-y: auto; }
-        .hist-item { border-bottom: 1px solid #222; padding: 4px 0; cursor: pointer; display: flex; justify-content: space-between; }
+        /* Modal / Ablakok */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 24px; width: 85%; max-width: 320px; border: 1px solid var(--border); text-align: center; }
+        
+        input { width: 100%; background: #000; border: 1px solid var(--border); padding: 15px; border-radius: 12px; color: #fff; font-size: 16px; margin: 15px 0; box-sizing: border-box; }
+        
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-secondary { background: none; color: var(--text); }
+        .btn-danger { color: var(--danger); }
 
-        .conv-row { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-        .unit-group { display: flex; gap: 8px; align-items: center; margin-bottom: 5px; }
-        input[type="number"], input[type="date"] { background: var(--input-bg); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; font-size: 18px; width: 100%; box-sizing: border-box; }
-        select { background: #3a3a3c; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 10px; font-size: 15px; flex-shrink: 0; }
-
-        .res-box { background: #111; padding: 15px; border-radius: 12px; margin-top: 10px; line-height: 1.6; border: 1px dashed var(--gray); text-align: center; }
-        /* Szülinap extra méret */
-        .res-bday { font-size: 22px; }
-
-        .back-btn { background: #333; color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; margin-top: auto; font-weight: bold; }
-        .mode-btn { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 8px; margin-bottom: 10px; align-self: flex-end; font-size: 12px; cursor: pointer; }
+        #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container" id="menu">
-    <div style="font-size: 50px; text-align: center; margin: 20px 0;">🛠️</div>
-    <h2>Smart Toolbox</h2>
-    <button class="main-btn" onclick="nav('calc')">🔢 Számológép <span>›</span></button>
-    <button class="main-btn" onclick="nav('hossz')">📏 Hosszúság <span>›</span></button>
-    <button class="main-btn" onclick="nav('sebesseg')">⚡ Sebesség <span>›</span></button>
-    <button class="main-btn" onclick="nav('bday')">🎂 Születésnap <span>›</span></button>
+<div id="loading-overlay">Szinkronizálás...</div>
+
+<div class="header">
+    <h1>TÉSZTA</h1>
+    <div class="add-btn" onclick="openAddModal()">+</div>
 </div>
 
-<div class="container hidden" id="calc">
-    <h2>Számológép</h2>
-    <div id="history-panel"><i>Nincs még előzmény...</i></div>
-    <button class="mode-btn" onclick="toggleCalc()">MODE</button>
-    <math-field id="calc-mf" read-only>0</math-field>
-    <div id="calc-basic" class="calc-grid">
-        <button class="btn-3d btn-op" onclick="op('clear')">AC</button>
-        <button class="btn-3d btn-op" onclick="op('back')">⌫</button>
-        <button class="btn-3d btn-op" onclick="ins('/')">÷</button>
-        <button class="btn-3d btn-op" onclick="ins('*')">×</button>
-        <button class="btn-3d" onclick="ins('7')">7</button>
-        <button class="btn-3d" onclick="ins('8')">8</button>
-        <button class="btn-3d" onclick="ins('9')">9</button>
-        <button class="btn-3d btn-op" onclick="ins('-')">-</button>
-        <button class="btn-3d" onclick="ins('4')">4</button>
-        <button class="btn-3d" onclick="ins('5')">5</button>
-        <button class="btn-3d" onclick="ins('6')">6</button>
-        <button class="btn-3d btn-op" onclick="ins('+')">+</button>
-        <button class="btn-3d" onclick="ins('1')">1</button>
-        <button class="btn-3d" onclick="ins('2')">2</button>
-        <button class="btn-3d" onclick="ins('3')">3</button>
-        <button class="btn-3d btn-eq" style="grid-row: span 2" onclick="calcResult()">=</button>
-        <button class="btn-3d" style="grid-column: span 2" onclick="ins('0')">0</button>
-        <button class="btn-3d" onclick="ins('.')">,</button>
+<div class="list-container" id="pasta-list">
     </div>
-    <div id="calc-pro" class="calc-grid hidden">
-        <button class="btn-3d btn-op" onclick="ins('^{#?}')">xⁿ</button>
-        <button class="btn-3d btn-op" onclick="ins('\\sqrt{#?}')">√</button>
-        <button class="btn-3d btn-op" onclick="ins('\\pi')">π</button>
-        <button class="btn-3d btn-op" onclick="ins('e')">e</button>
-        <button class="btn-3d btn-op" onclick="ins('\\sin(#?)')">sin</button>
-        <button class="btn-3d btn-op" onclick="ins('\\cos(#?)')">cos</button>
-        <button class="btn-3d btn-op" onclick="ins('\\tan(#?)')">tan</button>
-        <button class="btn-3d btn-op" onclick="ins('\\ln(#?)')">ln</button>
-        <button class="btn-3d btn-eq" style="grid-column: span 4" onclick="calcResult()">=</button>
+
+<div id="pasta-modal" class="modal">
+    <div class="modal-content">
+        <h3 id="modal-title">Új tészta</h3>
+        <input type="text" id="pasta-name" placeholder="Tészta neve (pl. Kifli)">
+        <button class="btn btn-primary" onclick="savePasta()">OKÉ</button>
+        <button class="btn btn-secondary" onclick="closeModal('pasta-modal')">Mégse</button>
     </div>
-    <button class="back-btn" onclick="handleBackBtn()">Vissza</button>
 </div>
 
-<div class="container hidden" id="hossz">
-    <h2>Hosszúság</h2>
-    <div class="conv-row">
-        <label>Metrikus</label>
-        <div class="unit-group"><input type="number" id="h-m1-v" oninput="syncH(0)"><select id="h-m1-u" onchange="syncH(0)"><option value="1000">km</option><option value="1" selected>m</option><option value="0.1">dm</option><option value="0.01">cm</option><option value="0.001">mm</option></select></div>
-        <div class="unit-group"><input type="number" id="h-m2-v" oninput="syncH(1)"><select id="h-m2-u" onchange="syncH(1)"><option value="1000">km</option><option value="1">m</option><option value="0.1">dm</option><option value="0.01" selected>cm</option><option value="0.001">mm</option></select></div>
+<div id="options-modal" class="modal">
+    <div class="modal-content">
+        <h3 id="selected-pasta-label">Opciók</h3>
+        <button class="btn btn-primary" onclick="editPasta()">Szerkesztés</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">Törlés</button>
+        <button class="btn btn-secondary" onclick="closeModal('options-modal')">Vissza</button>
     </div>
-    <div class="conv-row">
-        <label>Angolszász</label>
-        <div class="unit-group"><input type="number" id="h-a1-v" oninput="syncH(2)"><select id="h-a1-u" onchange="syncH(2)"><option value="1609.344" selected>Mile</option><option value="0.9144">Yard</option><option value="0.3048">Láb</option><option value="0.0254">Inch</option></select></div>
-        <div class="unit-group"><input type="number" id="h-a2-v" oninput="syncH(3)"><select id="h-a2-u" onchange="syncH(3)"><option value="1609.344">Mile</option><option value="0.9144">Yard</option><option value="0.3048">Láb</option><option value="0.0254" selected>Inch</option></select></div>
-    </div>
-    <button class="back-btn" onclick="handleBackBtn()">Vissza</button>
-</div>
-
-<div class="container hidden" id="sebesseg">
-    <h2>Sebesség</h2>
-    <div class="conv-row">
-        <label>Metrikus</label>
-        <div class="unit-group"><input type="number" id="s-m1-v" oninput="syncS(0)"><select id="s-m1-uD" onchange="syncS(0)"><option value="1000">km</option><option value="1">m</option></select><span>/</span><select id="s-m1-uT" onchange="syncS(0)"><option value="3600">óra</option><option value="60">perc</option><option value="1">másodperc</option></select></div>
-        <div class="unit-group"><input type="number" id="s-m2-v" oninput="syncS(1)"><select id="s-m2-uD" onchange="syncS(1)"><option value="1000">km</option><option value="1" selected>m</option></select><span>/</span><select id="s-m2-uT" onchange="syncS(1)"><option value="3600">óra</option><option value="60">perc</option><option value="1" selected>másodperc</option></select></div>
-    </div>
-    <div class="conv-row">
-        <label>Angolszász & Special</label>
-        <div class="unit-group"><input type="number" id="s-a1-v" oninput="syncS(2)"><select id="s-a1-uD" onchange="syncS(2)"><option value="1609.344">Mile</option><option value="0.3048">Láb</option><option value="1852">Csomó</option></select><span>/</span><select id="s-a1-uT" onchange="syncS(2)"><option value="3600">óra</option><option value="1">másodperc</option></select></div>
-        <div class="unit-group"><input type="number" id="s-a2-v" oninput="syncS(3)"><select id="s-a2-uD" onchange="syncS(3)"><option value="1609.344">Mile</option><option value="0.3048" selected>Láb</option><option value="1852">Csomó</option></select><span>/</span><select id="s-a2-uT" onchange="syncS(3)"><option value="3600">óra</option><option value="1" selected>másodperc</option></select></div>
-    </div>
-    <button class="back-btn" onclick="handleBackBtn()">Vissza</button>
-</div>
-
-<div class="container hidden" id="bday">
-    <h2>Születésnap</h2>
-    <input type="date" id="bday-input" onchange="calcBday()">
-    <div id="bday-res" class="res-box res-bday">Válassz dátumot!</div>
-    <button class="back-btn" onclick="handleBackBtn()">Vissza</button>
 </div>
 
 <script>
-    const mf = document.getElementById('calc-mf');
-    let calcHistory = [];
+    const DB_URL = "https://kiadaskoveto-2e474-default-rtdb.firebaseio.com/tesztak.json";
+    let pastas = [];
+    let selectedId = null;
+    let pressTimer;
 
-    function nav(id) {
-        document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-        if(id !== 'menu') window.history.pushState({view: id}, "");
-    }
-
-    function handleBackBtn() { if(!document.getElementById('menu').classList.contains('hidden')) return; window.history.back(); }
-    window.onpopstate = function(event) {
-        document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-        document.getElementById('menu').classList.remove('hidden');
-    };
-
-    function toggleCalc() {
-        document.getElementById('calc-basic').classList.toggle('hidden');
-        document.getElementById('calc-pro').classList.toggle('hidden');
-    }
-    function ins(v) { if(mf.value === "0") mf.value = ""; mf.insert(v); }
-    function op(t) { t === 'clear' ? mf.value = "0" : mf.executeCommand('deleteBackward'); }
-    function calcResult() {
+    // Betöltés
+    async function loadPastas() {
+        showLoading(true);
         try {
-            const rawExpr = mf.getValue("ascii-math");
-            const res = math.evaluate(rawExpr);
-            const formattedRes = math.format(res, {precision: 10});
-            calcHistory.unshift(rawExpr + " = " + formattedRes);
-            if(calcHistory.length > 5) calcHistory.pop();
-            document.getElementById('history-panel').innerHTML = calcHistory.map(h => `<div class="hist-item" onclick="mf.value='${h.split('=')[1].trim()}'"><span>${h}</span></div>`).join('');
-            mf.value = formattedRes;
-        } catch(e) { alert("Hiba!"); }
+            const res = await fetch(DB_URL);
+            const data = await res.json();
+            pastas = data ? Object.keys(data).map(id => ({ id, name: data[id].name })) : [];
+            render();
+        } catch (e) { console.error("Hiba:", e); }
+        showLoading(false);
     }
 
-    const hIds = ['h-m1', 'h-m2', 'h-a1', 'h-a2'];
-    function syncH(idx) {
-        let meters = parseFloat(document.getElementById(hIds[idx]+'-v').value) * parseFloat(document.getElementById(hIds[idx]+'-u').value);
-        if(isNaN(meters)) return;
-        hIds.forEach((id, i) => { if(i!==idx) document.getElementById(id+'-v').value = parseFloat((meters/parseFloat(document.getElementById(id+'-u').value)).toPrecision(6)); });
-    }
-
-    const sIds = ['s-m1', 's-m2', 's-a1', 's-a2'];
-    function syncS(idx) {
-        let v = parseFloat(document.getElementById(sIds[idx]+'-v').value);
-        let d = parseFloat(document.getElementById(sIds[idx]+'-uD').value);
-        let t = parseFloat(document.getElementById(sIds[idx]+'-uT').value);
-        if(isNaN(v)) return;
-        let ms = v * (d / t);
-        sIds.forEach((id, i) => {
-            if(i!==idx) {
-                let uD = parseFloat(document.getElementById(id+'-uD').value);
-                let uT = parseFloat(document.getElementById(id+'-uT').value);
-                document.getElementById(id+'-v').value = parseFloat((ms / (uD / uT)).toPrecision(6));
-            }
+    // Megjelenítés
+    function render() {
+        const list = document.getElementById('pasta-list');
+        list.innerHTML = '';
+        pastas.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'pasta-card';
+            div.innerText = p.name;
+            
+            // Hosszú nyomás események (mobil & desktop)
+            div.onmousedown = () => startPress(p.id, p.name);
+            div.onmouseup = () => clearTimeout(pressTimer);
+            div.ontouchstart = () => startPress(p.id, p.name);
+            div.ontouchend = () => clearTimeout(pressTimer);
+            
+            list.appendChild(div);
         });
     }
 
-    function calcBday() {
-        const b = new Date(document.getElementById('bday-input').value);
-        if(!b.getTime()) return;
-        const now = new Date();
-        const diffDays = Math.floor((now - b) / (1000 * 60 * 60 * 24));
-        let years = now.getFullYear() - b.getFullYear();
-        let months = now.getMonth() - b.getMonth();
-        let days = now.getDate() - b.getDate();
-        if (days < 0) { months--; days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
-        if (months < 0) { years--; months += 12; }
-
-        let next = new Date(now.getFullYear(), b.getMonth(), b.getDate());
-        if (next <= now) next.setFullYear(now.getFullYear() + 1);
-        
-        let nMonths = next.getMonth() - now.getMonth();
-        let nDays = next.getDate() - now.getDate();
-        if (nDays < 0) {
-            nMonths--;
-            nDays += new Date(next.getFullYear(), next.getMonth(), 0).getDate();
-        }
-        if (nMonths < 0) nMonths += 12;
-
-        document.getElementById('bday-res').innerHTML = `
-            <b>${diffDays.toLocaleString()}</b> napos vagy<br>
-            <span style="color:var(--accent)">${years} év, ${months} hó, ${days} nap</span><br>
-            <hr style="border:0; border-top:1px solid #333; margin:10px 0">
-            Következő szülinap:<br><b>${nMonths}</b> hónap, <b>${nDays}</b> nap múlva
-        `;
+    // Hosszú nyomás kezelése
+    function startPress(id, name) {
+        clearTimeout(pressTimer);
+        pressTimer = setTimeout(() => {
+            selectedId = id;
+            document.getElementById('selected-pasta-label').innerText = name;
+            document.getElementById('options-modal').style.display = 'flex';
+        }, 600); // 0.6 másodperc a hosszú nyomás
     }
+
+    // Mentés (Új vagy Szerkesztés)
+    async function savePasta() {
+        const name = document.getElementById('pasta-name').value.trim();
+        if(!name) return;
+        
+        showLoading(true);
+        const url = selectedId ? DB_URL.replace(".json", `/${selectedId}.json`) : DB_URL;
+        const method = selectedId ? 'PATCH' : 'POST';
+        
+        await fetch(url, { method, body: JSON.stringify({ name }) });
+        
+        document.getElementById('pasta-name').value = '';
+        closeModal('pasta-modal');
+        await loadPastas();
+    }
+
+    // Törlés
+    async function confirmDelete() {
+        if(confirm("Biztosan törlöd?")) {
+            showLoading(true);
+            await fetch(DB_URL.replace(".json", `/${selectedId}.json`), { method: 'DELETE' });
+            closeModal('options-modal');
+            await loadPastas();
+        }
+    }
+
+    // Segédfunkciók
+    function openAddModal() {
+        selectedId = null;
+        document.getElementById('modal-title').innerText = "Új tészta";
+        document.getElementById('pasta-name').value = '';
+        document.getElementById('pasta-modal').style.display = 'flex';
+    }
+
+    function editPasta() {
+        const p = pastas.find(x => x.id === selectedId);
+        document.getElementById('modal-title').innerText = "Szerkesztés";
+        document.getElementById('pasta-name').value = p.name;
+        closeModal('options-modal');
+        document.getElementById('pasta-modal').style.display = 'flex';
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
+
+    // Indítás
+    loadPastas();
 </script>
+
 </body>
 </html>
