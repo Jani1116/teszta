@@ -3,147 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Tészta 2026 Pro</title>
+    <title>Elite Tészta Pro 2026</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { 
-            --bg: #000000; --accent: #30d158; --purple: #5e5ce6;
-            --text: #ffffff; --gray: #8e8e93; --red: #ff453a; --card: #1c1c1e;
-        }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; overflow-x: hidden; }
-        .container { max-width: 500px; margin: auto; min-height: 95vh; display: flex; flex-direction: column; }
-        #user-info { font-size: 11px; color: var(--accent); text-align: center; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
-        h1 { font-size: 22px; text-align: center; margin: 5px 0 15px 0; font-weight: 800; }
+        :root { --bg: #000; --accent: #30d158; --gray: #8e8e93; --red: #ff453a; --card: #1c1c1e; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; }
+        .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; }
+        h1 { font-size: 22px; text-align: center; margin: 10px 0; font-weight: 800; }
+        .main-btn { width: 100%; background: transparent; color: var(--accent); border: 1.5px solid var(--accent); padding: 14px; border-radius: 16px; font-weight: 700; margin-bottom: 8px; }
         
-        .main-btn { 
-            width: 100%; background: transparent; color: var(--accent); 
-            border: 1.5px solid var(--accent); padding: 14px; border-radius: 16px; 
-            font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-bottom: 8px;
-        }
-        .list-row { background: rgba(255,255,255,0.07); padding: 10px; border-radius: 14px; margin-bottom: 6px; display: grid; align-items: center; gap: 8px; }
-        .grid-main { grid-template-columns: 1fr; }
-        .grid-recipe { grid-template-columns: 2fr 1fr 45px; }
-        .grid-calc { grid-template-columns: 2fr 1.2fr 1fr 40px; }
-
-        .data-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 8px; border-radius: 10px; text-align: left; font-size: 14px; }
-        .num-val { text-align: center; font-weight: bold; color: var(--accent); }
-
         /* Kerekítés Panel */
-        .round-ctrl { display: flex; align-items: center; justify-content: space-between; background: #111; padding: 10px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #333; }
-        .round-opt { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: bold; color: var(--gray); }
+        .round-box { background: #111; padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .round-opts { display: flex; gap: 15px; }
+        .round-opt { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: bold; color: var(--gray); cursor: pointer; }
         .round-opt.active { color: var(--accent); }
-        .step-btn { background: var(--card); border: 1px solid var(--accent); color: var(--accent); width: 35px; height: 35px; border-radius: 10px; font-size: 20px; font-weight: bold; }
+        .step-ui { display: flex; align-items: center; gap: 10px; }
+        .step-btn { background: var(--card); border: 1.2px solid var(--accent); color: var(--accent); width: 38px; height: 38px; border-radius: 10px; font-size: 22px; font-weight: bold; }
 
+        /* Lista Sorok */
+        .list-row { background: rgba(255,255,255,0.07); padding: 10px; border-radius: 14px; margin-bottom: 6px; display: grid; gap: 8px; align-items: center; }
+        .grid-calc { grid-template-columns: 1.8fr 1fr 1fr 40px; }
+        .data-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 5px; border-radius: 10px; text-align: center; font-size: 14px; }
+        
         /* Összetétel Panel */
-        .summary-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #050505; border-top: 2px solid var(--accent); padding: 12px; box-sizing: border-box; z-index: 200; border-radius: 20px 20px 0 0; }
-        .summary-title { font-weight: bold; color: var(--accent); border-bottom: 1px solid rgba(48, 209, 88, 0.2); margin-bottom: 6px; padding-bottom: 4px; font-size: 12px; display: flex; justify-content: space-between; }
-        .summary-item { display: grid; grid-template-columns: 1.2fr 1fr 1fr; font-family: monospace; padding: 3px 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .val-orig { color: var(--gray); font-size: 13px; text-align: right; }
-        .val-round { color: var(--accent); font-weight: bold; text-align: right; }
+        .summary-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #050505; border-top: 2px solid var(--accent); padding: 15px; border-radius: 20px 20px 0 0; z-index: 100; box-sizing: border-box; }
+        .summary-header { font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(48,209,88,0.2); padding-bottom: 5px; }
+        .summary-row { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; padding: 5px 0; font-family: monospace; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .v-orig { color: var(--gray); text-align: right; font-size: 13px; padding-right: 5px; }
+        .v-round { color: var(--accent); text-align: right; font-weight: bold; }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: #121212; padding: 25px; border-radius: 24px; width: 85%; border: 1px solid rgba(48, 209, 88, 0.3); text-align: center; }
-        input { width: 100%; background: #1a1a1a; border: 1px solid var(--accent); padding: 12px; border-radius: 12px; color: #fff; text-align: center; margin-bottom: 10px; font-size: 16px; }
-        .row-op { background: none; border: none; color: var(--red); font-size: 24px; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id="loading-overlay" style="position:fixed; inset:0; background:black; z-index:3000; display:none; align-items:center; justify-content:center; color:var(--accent);">SZINKRONIZÁLÁS...</div>
-
-<div id="login-screen" class="container" style="justify-content: center;">
-    <h1 style="color: var(--accent);">Elite Tészta</h1>
-    <input type="text" id="login-user" placeholder="Név">
-    <input type="password" id="login-pass" placeholder="Jelszó">
-    <button class="main-btn" onclick="handleLogin()">BELÉPÉS</button>
-</div>
-
-<div id="app-content" class="container" style="display:none;">
-    <div id="user-info"></div>
-    <div style="display: flex; align-items: center; justify-content: center; position: relative;">
-        <button id="back-btn" class="hidden" onclick="goHome()" style="position:absolute; left:0; background:none; border:none; color:var(--accent); font-size:20px;">❮</button>
+<div id="app-content" class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button id="back-btn" class="hidden" onclick="goHome()" style="background:none; border:none; color:var(--accent); font-size:24px;">❮</button>
         <h1 id="main-title">Tészták</h1>
-        <button class="add-btn" onclick="headerAdd()" style="position:absolute; right:0; background:none; border:none; color:var(--accent); font-size:30px;">+</button>
+        <button onclick="headerAdd()" style="background:none; border:none; color:var(--accent); font-size:32px;">+</button>
     </div>
 
     <div id="view-main"><div id="pasta-list"></div></div>
-    
+
     <div id="view-details" class="hidden">
-        <div id="round-control-ui" class="round-ctrl">
-            <div style="display:flex; gap:15px;">
-                <label class="round-opt" id="label-05"><input type="checkbox" id="chk-05" onclick="toggleRound(0.5)"> 0.5 kg</label>
-                <label class="round-opt" id="label-10"><input type="checkbox" id="chk-10" onclick="toggleRound(1.0)"> 1.0 kg</label>
+        <div id="round-ui" class="round-box">
+            <div class="round-opts">
+                <label class="round-opt" id="l05"><input type="checkbox" id="c05" onchange="setRound(0.5)"> 0.5 kg</label>
+                <label class="round-opt" id="l10"><input type="checkbox" id="c10" onchange="setRound(1.0)"> 1.0 kg</label>
             </div>
-            <div id="step-ui" class="hidden" style="display:flex; gap:10px; align-items:center;">
-                <button class="step-btn" onclick="stepRound(-1)">-</button>
-                <span id="step-val" style="font-weight:bold; color:var(--accent); min-width:50px; text-align:center;">0</span>
-                <button class="step-btn" onclick="stepRound(1)">+</button>
+            <div id="stepper" class="step-ui hidden">
+                <button class="step-btn" onclick="modifyOffset(-1)">-</button>
+                <span id="offset-lbl" style="color:var(--accent); font-weight:bold; min-width:45px; text-align:center;">+0 kg</span>
+                <button class="step-btn" onclick="modifyOffset(1)">+</button>
             </div>
         </div>
         <div id="rows-container" style="padding-bottom: 240px;"></div>
         <div id="summary-panel" class="summary-panel hidden"></div>
     </div>
-
-    <div style="height: 100px;"></div>
-    <div id="admin-tools" style="padding: 10px;">
-        <button id="admin-reg-btn" class="main-btn" onclick="handleRegister()" style="display:none; border-color: var(--purple); color: var(--purple);">👤 ÚJ FELHASZNÁLÓ</button>
-        <button onclick="logout()" style="background:none; border:none; color:var(--red); width:100%; font-size:10px; opacity:0.6; padding:10px;">Kijelentkezés</button>
-    </div>
 </div>
-
-<div id="edit-modal" class="modal"><div class="modal-content">
-    <h3 id="modal-label" style="color:var(--accent)"></h3>
-    <input type="text" id="edit-input">
-    <button class="main-btn" onclick="processEdit()">MENTÉS</button>
-    <button class="main-btn" onclick="closeModal('edit-modal')" style="border:none; color:var(--gray)">Mégse</button>
-</div></div>
-
-<div id="options-modal" class="modal"><div class="modal-content">
-    <h3 id="opt-name" style="color:var(--accent)"></h3>
-    <button class="main-btn" onclick="startRename()">Átnevezés</button>
-    <button class="main-btn" style="border-color:var(--purple); color:var(--purple)" onclick="openRecipe()">Recept szerkesztése (%)</button>
-    <button class="main-btn" style="border-color:var(--red); color:var(--red)" onclick="askDeletePasta()">Törlés</button>
-    <button class="main-btn" onclick="closeModal('options-modal')" style="border:none; color:var(--gray)">Vissza</button>
-</div></div>
 
 <script>
     const DB_URL = "https://kiadaskoveto-2e474-default-rtdb.firebaseio.com/";
     let currentUser = JSON.parse(localStorage.getItem('teszta_session'));
     let db = {};
-    let state = { 
-        view: 'main', activeId: null, editContext: null, 
-        roundMode: null, // 0.5 vagy 1.0
-        manualOffset: 0  // Hányszor nyomtunk a +/- gombra
-    };
-
-    // AUTH & CORE
-    async function handleLogin() {
-        const u = document.getElementById('login-user').value.trim();
-        const p = document.getElementById('login-pass').value.trim();
-        if(!u || !p) return;
-        showLoading(true);
-        try {
-            const res = await fetch(`${DB_URL}shopping_users/${u}.json`);
-            let stored = await res.json();
-            if (stored && String(stored).replace(/"/g, '') === String(p)) {
-                currentUser = { name: u };
-                localStorage.setItem('teszta_session', JSON.stringify(currentUser));
-                initApp();
-            } else { alert("Hibás jelszó!"); }
-        } catch (e) { alert("Hiba!"); }
-        showLoading(false);
-    }
-
-    function initApp() {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app-content').style.display = 'flex';
-        document.getElementById('user-info').innerText = currentUser.name;
-        if (currentUser.name.toLowerCase() === 'jani') document.getElementById('admin-reg-btn').style.display = 'block';
-        loadData();
-        setInterval(loadData, 5000);
-    }
+    let state = { view: 'main', activeId: null, round: null, offset: 0 };
 
     async function loadData() {
         const res = await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`);
@@ -151,170 +76,111 @@
         render();
     }
 
-    async function sync() {
-        await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`, { method: 'PUT', body: JSON.stringify(db) });
-        render();
-    }
-
-    // KEREKÍTÉS LOGIKA
-    function toggleRound(val) {
-        if (state.roundMode === val) {
-            state.roundMode = null;
-            state.manualOffset = 0;
-        } else {
-            state.roundMode = val;
-            state.manualOffset = 0;
-            document.getElementById(val === 0.5 ? 'chk-10' : 'chk-05').checked = false;
+    function setRound(val) {
+        if (state.round === val) { state.round = null; state.offset = 0; }
+        else { 
+            state.round = val; state.offset = 0;
+            document.getElementById(val === 0.5 ? 'c10' : 'c05').checked = false;
         }
         render();
     }
 
-    function stepRound(dir) {
-        state.manualOffset += dir;
-        render();
-    }
-
-    function toNum(v) { return parseFloat(String(v).replace(',', '.')) || 0; }
+    function modifyOffset(dir) { state.offset += dir; render(); }
 
     function doCalc() {
         const p = db[state.activeId];
         if (!p || !p.recipe || p.recipe.length === 0) return;
 
-        // 1. Alap összsúly (rendelés alapján)
-        let dkgTotal = 0;
-        (p.items || []).forEach(i => dkgTotal += (toNum(i.suly) * toNum(i.db)));
-        let kgTotalOrig = dkgTotal / 100;
+        let totalSulyDk = 0;
+        (p.items || []).forEach(i => totalSulyDk += (parseFloat(i.suly) * parseFloat(i.db)));
+        let kgOrig = totalSulyDk / 100;
 
-        let totalPerc = 0;
-        p.recipe.forEach(r => totalPerc += toNum(r.perc));
-        let unitOrig = totalPerc > 0 ? (kgTotalOrig / totalPerc) : 0;
+        let recipeSumPerc = 0;
+        p.recipe.forEach(r => recipeSumPerc += parseFloat(r.perc));
+        let unitOrig = recipeSumPerc > 0 ? (kgOrig / recipeSumPerc) : 0;
 
-        // 2. Kerekítés kiszámítása (az első összetevőre - Liszt)
-        let firstIngPerc = toNum(p.recipe[0].perc);
-        let firstIngKgOrig = unitOrig * firstIngPerc;
+        // Kerekítés alapja: az első sor (Liszt)
+        let lisztPerc = parseFloat(p.recipe[0].perc);
+        let lisztKgOrig = unitOrig * lisztPerc;
         
         let unitFinal = unitOrig;
-        let isRounded = state.roundMode !== null;
+        let isActive = state.round !== null;
 
-        if (isRounded) {
-            // Felkerekítés a megadott lépcsőre (pl. 7.09 -> 7.5)
-            let step = state.roundMode;
-            let roundedBase = Math.ceil(firstIngKgOrig / step) * step;
-            // Plusz a manuális léptetés (+/- gombok)
-            let firstIngKgRounded = roundedBase + (state.manualOffset * step);
-            // Az új egységnyi súly a kerekített lisztből visszaszámolva
-            unitFinal = firstIngKgPerc > 0 ? (firstIngKgRounded / firstIngPerc) : 0;
+        if (isActive) {
+            let base = Math.ceil(lisztKgOrig / state.round) * state.round;
+            let lisztKgFinal = base + (state.offset * state.round);
+            unitFinal = lisztPerc > 0 ? (lisztKgFinal / lisztPerc) : 0;
         }
 
-        let kgTotalFinal = unitFinal * totalPerc;
-        let diff = kgTotalFinal - kgTotalOrig;
+        let kgFinalTotal = unitFinal * recipeSumPerc;
+        let diff = kgFinalTotal - kgOrig;
 
-        // UI Frissítés
-        const diffText = isRounded ? ` <span style="color:var(--accent)">+ (${diff.toFixed(2)} kg tészta)</span>` : "";
-        let h = `<div class="summary-title"><span>ÖSSZETÉTEL (${kgTotalOrig.toFixed(2)} kg)</span>${diffText}</div>`;
-        
-        p.recipe.forEach((ing, idx) => {
-            let kgO = unitOrig * toNum(ing.perc);
-            let kgR = unitFinal * toNum(ing.perc);
-            
-            h += `<div class="summary-item">
-                    <span>${ing.name}</span>
-                    <span class="val-orig">${isRounded ? kgO.toFixed(3) + ' kg' : ''}</span>
-                    <span class="val-round">${kgR.toFixed(3)} kg</span>
-                  </div>`;
+        let h = `<div class="summary-header">
+            <span>ÖSSZETÉTEL (${kgOrig.toFixed(2)} kg)</span>
+            ${isActive ? `<span style="color:var(--accent)">+ (${diff.toFixed(2)} kg tészta)</span>` : ''}
+        </div>`;
+
+        p.recipe.forEach(ing => {
+            let oS = unitOrig * parseFloat(ing.perc);
+            let rS = unitFinal * parseFloat(ing.perc);
+            h += `<div class="summary-row">
+                <span>${ing.name}</span>
+                <span class="v-orig">${isActive ? oS.toFixed(3) + ' kg' : ''}</span>
+                <span class="v-round">${rS.toFixed(3)} kg</span>
+            </div>`;
         });
+
         document.getElementById('summary-panel').innerHTML = h;
-        
-        // Gombok állapota
-        document.getElementById('step-ui').style.display = isRounded ? 'flex' : 'none';
-        if(isRounded) {
-            document.getElementById('step-val').innerText = (state.manualOffset >= 0 ? "+" : "") + (state.manualOffset * state.roundMode).toFixed(1) + " kg";
-            document.getElementById('label-05').className = state.roundMode === 0.5 ? "round-opt active" : "round-opt";
-            document.getElementById('label-10').className = state.roundMode === 1.0 ? "round-opt active" : "round-opt";
+        document.getElementById('stepper').classList.toggle('hidden', !isActive);
+        if(isActive) {
+            document.getElementById('offset-lbl').innerText = (state.offset >= 0 ? "+" : "") + (state.offset * state.round).toFixed(1) + " kg";
+            document.getElementById('l05').className = state.round === 0.5 ? "round-opt active" : "round-opt";
+            document.getElementById('l10').className = state.round === 1.0 ? "round-opt active" : "round-opt";
         }
     }
 
-    // UI RENDERING
     function render() {
-        const list = document.getElementById('pasta-list');
-        const rows = document.getElementById('rows-container');
-        const summary = document.getElementById('summary-panel');
-        
         if (state.view === 'main') {
-            document.getElementById('back-btn').classList.add('hidden');
             document.getElementById('view-main').classList.remove('hidden');
             document.getElementById('view-details').classList.add('hidden');
+            document.getElementById('back-btn').classList.add('hidden');
             document.getElementById('main-title').innerText = "Tészták";
-            list.innerHTML = '';
+            let h = '';
             Object.keys(db).sort().forEach(id => {
-                const d = document.createElement('div');
-                d.className = 'list-row grid-main';
-                d.innerHTML = `<button class="data-btn" onclick="openCalc('${id}')" style="font-weight:700; border-left:4px solid var(--accent)">${db[id].name}</button>`;
-                let t;
-                d.ontouchstart = () => t = setTimeout(() => { state.activeId = id; showOptions(); }, 600);
-                d.ontouchend = () => clearTimeout(t);
-                list.appendChild(d);
+                h += `<div class="list-row"><button class="data-btn" onclick="openCalc('${id}')" style="font-weight:bold; text-align:left; padding-left:15px; border-left:4px solid var(--accent)">${db[id].name}</button></div>`;
             });
+            document.getElementById('pasta-list').innerHTML = h;
         } else {
-            document.getElementById('back-btn').classList.remove('hidden');
             document.getElementById('view-main').classList.add('hidden');
             document.getElementById('view-details').classList.remove('hidden');
+            document.getElementById('back-btn').classList.remove('hidden');
+            document.getElementById('summary-panel').classList.remove('hidden');
             const p = db[state.activeId];
-            rows.innerHTML = '';
+            document.getElementById('main-title').innerText = p.name;
             
-            if (state.view === 'recipe') {
-                document.getElementById('main-title').innerText = p.name + " %";
-                document.getElementById('round-control-ui').classList.add('hidden');
-                summary.classList.add('hidden');
-                (p.recipe || []).forEach((r, i) => {
-                    rows.innerHTML += `<div class="list-row grid-recipe"><button class="data-btn" onclick="startEdit('recipe',${i},'name')">${r.name}</button><button class="data-btn num-val" onclick="startEdit('recipe',${i},'perc')">${r.perc}%</button><button class="row-op" onclick="delRow(${i})">−</button></div>`;
-                });
-            } else {
-                document.getElementById('main-title').innerText = p.name;
-                document.getElementById('round-control-ui').classList.remove('hidden');
-                summary.classList.remove('hidden');
-                (p.items || []).forEach((it, i) => {
-                    rows.innerHTML += `<div class="list-row grid-calc"><button class="data-btn" onclick="startEdit('items',${i},'name')">${it.name}</button><button class="data-btn num-val" onclick="startEdit('items',${i},'suly')">${it.suly} dk</button><button class="data-btn num-val" onclick="startEdit('items',${i},'db')">${it.db} db</button><button class="row-op" onclick="delRow(${i})">−</button></div>`;
-                });
-                doCalc();
-            }
+            let h = '';
+            (p.items || []).forEach((it, i) => {
+                h += `<div class="list-row grid-calc">
+                    <div class="data-btn">${it.name}</div>
+                    <div class="data-btn" style="color:var(--accent)">${it.suly} dk</div>
+                    <div class="data-btn" style="color:var(--accent)">${it.db} db</div>
+                    <button onclick="delRow(${i})" style="background:none; border:none; color:var(--red); font-size:20px;">−</button>
+                </div>`;
+            });
+            document.getElementById('rows-container').innerHTML = h;
+            doCalc();
         }
     }
 
-    // ACTIONS
-    function headerAdd() {
-        if (state.view === 'main') { state.editContext = {type:'new'}; openEditModal("Új tészta neve", ""); }
-        else if (state.view === 'recipe') { if(!db[state.activeId].recipe) db[state.activeId].recipe=[]; db[state.activeId].recipe.push({name:'Liszt', perc:100}); sync(); }
-        else { if(!db[state.activeId].items) db[state.activeId].items=[]; db[state.activeId].items.push({name:'Típus', suly:0, db:0}); sync(); }
-    }
-
-    function startEdit(l, i, f) { state.editContext = {type:'field', l, i, f}; openEditModal("Módosítás", db[state.activeId][l][i][f]); }
-
-    function processEdit() {
-        const v = document.getElementById('edit-input').value;
-        const c = state.editContext;
-        if(c.type==='new') db["ID"+Date.now()] = {name:v, recipe:[{name:'Liszt', perc:100}], items:[]};
-        else if(c.type==='field') {
-            const finalVal = (c.f === 'perc' || c.f === 'suly' || c.f === 'db') ? toNum(v) : v;
-            db[state.activeId][c.l][c.i][c.f] = finalVal;
-        }
-        else if(c.type==='rename') db[state.activeId].name = v;
-        closeModal('edit-modal'); sync();
-    }
-
-    function delRow(i) { if(confirm("Törlöd?")) { const l = state.view==='recipe'?'recipe':'items'; db[state.activeId][l].splice(i,1); sync(); } }
-    function askDeletePasta() { if(confirm("Törlöd az egészet?")) { delete db[state.activeId]; closeModal('options-modal'); state.view='main'; sync(); } }
-    function openEditModal(l, v) { document.getElementById('modal-label').innerText=l; document.getElementById('edit-input').value=v; document.getElementById('edit-modal').style.display='flex'; document.getElementById('edit-input').focus(); }
-    function showOptions() { document.getElementById('opt-name').innerText=db[state.activeId].name; document.getElementById('options-modal').style.display='flex'; }
-    function startRename() { state.editContext={type:'rename'}; closeModal('options-modal'); openEditModal("Átnevezés", db[state.activeId].name); }
-    function openRecipe() { state.view='recipe'; closeModal('options-modal'); render(); }
-    function openCalc(id) { state.activeId=id; state.view='calc'; state.roundMode=null; state.manualOffset=0; render(); }
-    function goHome() { state.view='main'; render(); }
-    function closeModal(id) { document.getElementById(id).style.display='none'; }
-    function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
+    function openCalc(id) { state.activeId = id; state.view = 'details'; render(); }
+    function goHome() { state.view = 'main'; render(); }
     function logout() { localStorage.removeItem('teszta_session'); location.reload(); }
-
-    if(currentUser) initApp();
+    
+    // Kezdés
+    if(currentUser) {
+        document.getElementById('app-content').style.display = 'block';
+        loadData();
+    }
 </script>
 </body>
 </html>
