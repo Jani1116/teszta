@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teszta-v1';
+const CACHE_NAME = 'teszta-v3';
 const assets = [
   './',
   './index.html',
