@@ -4,174 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Elite Tészta Pro 2026</title>
-    
     <link rel="manifest" href="manifest.json">
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
     </script>
-
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-
     <style>
-        :root {
-            --bg: #000000;
-            --glass: rgba(28, 28, 30, 0.6);
-            --border: rgba(255, 255, 255, 0.08);
-            --accent: #30d158;
-            --text: #ffffff;
-            --gray: #8e8e93;
-            --danger: #ff453a;
-        }
-
+        :root { --bg: #000; --glass: rgba(28,28,30,0.6); --border: rgba(255,255,255,0.08); --accent: #30d158; --text: #fff; --gray: #8e8e93; --danger: #ff453a; }
         * { box-sizing: border-box; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 10px;
-            padding-top: env(safe-area-inset-top);
-        }
-
-        .container {
-            max-width: 500px;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 5px;
-            margin-bottom: 15px;
-        }
-
-        h1 { font-size: 22px; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--accent);
-            font-size: 24px;
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 18px;
-            border: 1px solid var(--border);
-            padding: 15px;
-            margin-bottom: 12px;
-        }
-
-        .main-btn {
-            width: 100%;
-            background: var(--glass);
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 16px;
-            border-radius: 16px;
-            font-weight: 600;
-            font-size: 16px;
-            text-align: left;
-            margin-bottom: 8px;
-            cursor: pointer;
-        }
-
-        .main-btn.active-item { border-left: 4px solid var(--accent); padding-left: 12px; font-weight: 700; }
-
-        .round-box { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-
-        .round-opts { display: flex; gap: 10px; }
-
-        .round-opt {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--gray);
-            cursor: pointer;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-        }
-
-        .round-opt.active { color: var(--accent); background: rgba(48, 209, 88, 0.15); }
-        .round-opt input { display: none; }
-
-        .step-ui { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 3px; }
-        .step-btn { background: none; border: none; color: var(--accent); width: 36px; height: 36px; font-size: 22px; font-weight: bold; cursor: pointer; }
-
-        .list-row { display: grid; gap: 10px; align-items: center; margin-bottom: 8px; }
-        .grid-calc { grid-template-columns: 1.8fr 1fr 1fr 40px; }
-
-        .data-tag { background: rgba(255,255,255,0.05); color: var(--text); padding: 14px; border-radius: 12px; text-align: center; font-size: 14px; font-weight: 500; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: env(safe-area-inset-top); }
+        .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; }
+        h1 { font-size: 22px; margin: 0; font-weight: 800; }
+        .icon-btn { background: none; border: none; color: var(--accent); font-size: 32px; cursor: pointer; }
+        .card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 18px; border: 1px solid var(--border); padding: 15px; margin-bottom: 12px; }
+        .main-btn { width: 100%; background: var(--glass); color: var(--text); border: 1px solid var(--border); padding: 16px; border-radius: 16px; font-weight: 600; text-align: left; margin-bottom: 8px; }
+        .round-box { display: flex; justify-content: space-between; align-items: center; }
+        .round-opt { font-size: 14px; color: var(--gray); padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .round-opt.active { color: var(--accent); background: rgba(48,209,88,0.15); }
+        .step-ui { display: flex; align-items: center; gap: 10px; }
+        .step-btn { color: var(--accent); font-size: 24px; background: none; border: none; font-weight: bold; }
+        .list-row { display: grid; grid-template-columns: 1.8fr 1fr 1fr 40px; gap: 10px; margin-bottom: 8px; }
+        .data-tag { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; text-align: center; font-size: 14px; }
         .data-tag.value { color: var(--accent); font-weight: 600; }
-        
-        .summary-panel {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 500px;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border);
-            padding: 15px;
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
-            border-radius: 24px 24px 0 0;
-            z-index: 100;
-        }
-
-        .summary-header { font-weight: 700; color: var(--text); font-size: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .summary-row { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; padding: 6px 0; font-size: 15px; }
-        .v-orig { color: var(--gray); text-align: right; font-size: 13px; }
+        .summary-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(10,10,10,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 15px; border-radius: 24px 24px 0 0; }
+        .summary-header { font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .summary-row { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; padding: 5px 0; }
+        .v-orig { color: var(--gray); text-align: right; }
         .v-round { color: var(--accent); text-align: right; font-weight: 700; }
-
         .hidden { display: none !important; }
         #view-details { padding-bottom: 280px; }
     </style>
 </head>
 <body>
-
 <div id="app-content" class="container">
     <div class="header-bar">
-        <button id="back-btn" class="icon-btn hidden" onclick="goHome()">❮</button>
+        <button id="back-btn" class="hidden" onclick="goHome()" style="background:none; border:none; color:var(--accent); font-size:24px;">❮</button>
         <h1 id="main-title">Tészták</h1>
         <button class="icon-btn" onclick="headerAdd()">+</button>
     </div>
-
-    <div id="view-main">
-        <div id="pasta-list"></div>
-    </div>
-
+    <div id="view-main"><div id="pasta-list"></div></div>
     <div id="view-details" class="hidden">
-        <div id="round-ui" class="card round-box">
-            <div class="round-opts">
-                <label class="round-opt" id="l05"><input type="checkbox" id="c05" onchange="setRound(0.5)"> 0.5 kg</label>
-                <label class="round-opt" id="l10"><input type="checkbox" id="c10" onchange="setRound(1.0)"> 1.0 kg</label>
+        <div class="card round-box">
+            <div style="display:flex; gap:10px;">
+                <div class="round-opt" id="l05" onclick="setRound(0.5)">0.5 kg</div>
+                <div class="round-opt" id="l10" onclick="setRound(1.0)">1.0 kg</div>
             </div>
             <div id="stepper" class="step-ui hidden">
                 <button class="step-btn" onclick="modifyOffset(-1)">−</button>
-                <span id="offset-lbl" style="color:var(--accent); font-weight:700; min-width:50px; text-align:center;">+0 kg</span>
+                <span id="offset-lbl" style="color:var(--accent); min-width:50px; text-align:center;">+0 kg</span>
                 <button class="step-btn" onclick="modifyOffset(1)">+</button>
             </div>
         </div>
-
         <div id="rows-container"></div>
-
         <div id="summary-panel" class="summary-panel hidden"></div>
     </div>
 </div>
@@ -183,16 +71,15 @@
     let state = { view: 'main', activeId: null, round: null, offset: 0 };
 
     async function loadData() {
-        const res = await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`);
-        db = await res.json() || {};
-        render();
+        try {
+            const res = await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`);
+            db = await res.json() || {};
+            render();
+        } catch(e) { console.error(e); }
     }
 
     async function saveData() {
-        await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`, {
-            method: 'PUT',
-            body: JSON.stringify(db)
-        });
+        await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`, { method: 'PUT', body: JSON.stringify(db) });
         render();
     }
 
@@ -203,67 +90,25 @@
         db[id] = {
             name: nev,
             items: [{ name: "Alap", suly: 10, db: 1 }],
-            recipe: [
-                { name: "Liszt", perc: 100 },
-                { name: "Víz", perc: 60 },
-                { name: "Só", perc: 2 }
-            ]
+            recipe: [{ name: "Liszt", perc: 100 }, { name: "Víz", perc: 60 }, { name: "Só", perc: 2 }]
         };
         await saveData();
     }
 
     async function delRow(index) {
-        if (confirm("Törlöd ezt a sort?")) {
+        if (confirm("Törlöd?")) {
             db[state.activeId].items.splice(index, 1);
             await saveData();
         }
     }
 
     function setRound(val) {
-        if (state.round === val) { state.round = null; state.offset = 0; }
-        else { 
-            state.round = val; state.offset = 0;
-            if(val === 0.5 && document.getElementById('c10')) document.getElementById('c10').checked = false;
-            if(val === 1.0 && document.getElementById('c05')) document.getElementById('c05').checked = false;
-        }
+        state.round = (state.round === val) ? null : val;
+        state.offset = 0;
         render();
     }
 
     function modifyOffset(dir) { state.offset += dir; render(); }
-
-    function doCalc() {
-        const p = db[state.activeId];
-        if (!p || !p.recipe) return;
-        let totalSulyDk = 0;
-        (p.items || []).forEach(i => totalSulyDk += (parseFloat(i.suly) * parseFloat(i.db)));
-        let kgOrig = totalSulyDk / 100;
-        let recipeSumPerc = 0;
-        p.recipe.forEach(r => recipeSumPerc += parseFloat(r.perc));
-        let unitOrig = recipeSumPerc > 0 ? (kgOrig / recipeSumPerc) : 0;
-        let lisztPerc = parseFloat(p.recipe[0].perc);
-        let lisztKgOrig = unitOrig * lisztPerc;
-        let unitFinal = unitOrig;
-        let isActive = state.round !== null;
-        if (isActive) {
-            let base = Math.ceil(lisztKgOrig / state.round) * state.round;
-            let lisztKgFinal = base + (state.offset * state.round);
-            unitFinal = lisztPerc > 0 ? (lisztKgFinal / lisztPerc) : 0;
-        }
-        let kgFinalTotal = unitFinal * recipeSumPerc;
-        let h = `<div class="summary-header"><span>ÖSSZETÉTEL (${kgOrig.toFixed(2)} kg)</span></div>`;
-        p.recipe.forEach(ing => {
-            let oS = unitOrig * parseFloat(ing.perc);
-            let rS = unitFinal * parseFloat(ing.perc);
-            h += `<div class="summary-row"><span>${ing.name}</span><span class="v-orig">${isActive ? oS.toFixed(3) : ''}</span><span class="v-round">${rS.toFixed(3)} kg</span></div>`;
-        });
-        document.getElementById('summary-panel').innerHTML = h;
-        document.getElementById('stepper').classList.toggle('hidden', !isActive);
-        if(isActive) {
-            document.getElementById('offset-lbl').innerText = (state.offset >= 0 ? "+" : "") + (state.offset * state.round).toFixed(1) + " kg";
-            document.getElementById('l05').className = state.round === 0.5 ? "round-opt active" : "round-opt";
-            document.getElementById('l10').className = state.round === 1.0 ? "round-opt active" : "round-opt";
-        }
-    }
 
     function render() {
         if (state.view === 'main') {
@@ -286,10 +131,37 @@
             document.getElementById('main-title').innerText = p.name;
             let h = '';
             (p.items || []).forEach((it, i) => {
-                h += `<div class="list-row grid-calc"><div class="data-tag">${it.name}</div><div class="data-tag value">${it.suly} dk</div><div class="data-tag value">${it.db} db</div><button onclick="delRow(${i})" style="background:none;border:none;color:var(--danger);font-size:24px;">−</button></div>`;
+                h += `<div class="list-row"><div class="data-tag">${it.name}</div><div class="data-tag value">${it.suly} dk</div><div class="data-tag value">${it.db} db</div><button onclick="delRow(${i})" style="background:none; border:none; color:var(--danger); font-size:24px;">−</button></div>`;
             });
             document.getElementById('rows-container').innerHTML = h;
             doCalc();
+        }
+    }
+
+    function doCalc() {
+        const p = db[state.activeId];
+        let totalSulyDk = 0;
+        (p.items || []).forEach(i => totalSulyDk += (i.suly * i.db));
+        let kgOrig = totalSulyDk / 100;
+        let recipeSumPerc = 0;
+        p.recipe.forEach(r => recipeSumPerc += r.perc);
+        let unitOrig = recipeSumPerc > 0 ? (kgOrig / recipeSumPerc) : 0;
+        let lisztPerc = p.recipe[0].perc;
+        let unitFinal = unitOrig;
+        if (state.round) {
+            let base = Math.ceil((unitOrig * lisztPerc) / state.round) * state.round;
+            unitFinal = (base + (state.offset * state.round)) / lisztPerc;
+        }
+        let h = `<div class="summary-header"><span>ÖSSZETÉTEL (${kgOrig.toFixed(2)} kg)</span></div>`;
+        p.recipe.forEach(ing => {
+            h += `<div class="summary-row"><span>${ing.name}</span><span class="v-orig">${state.round ? (unitOrig * ing.perc).toFixed(3) : ''}</span><span class="v-round">${(unitFinal * ing.perc).toFixed(3)} kg</span></div>`;
+        });
+        document.getElementById('summary-panel').innerHTML = h;
+        document.getElementById('stepper').classList.toggle('hidden', !state.round);
+        if(state.round) {
+            document.getElementById('offset-lbl').innerText = (state.offset >= 0 ? "+" : "") + (state.offset * state.round).toFixed(1) + " kg";
+            document.getElementById('l05').className = state.round === 0.5 ? "round-opt active" : "round-opt";
+            document.getElementById('l10').className = state.round === 1.0 ? "round-opt active" : "round-opt";
         }
     }
 
