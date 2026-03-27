@@ -6,7 +6,7 @@
     <link rel="manifest" href="manifest.json">
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').then(() => console.log("PWA Aktív"));
+        navigator.serviceWorker.register('sw.js');
       }
     </script>
     <title>Elite Tészta Pro 2026</title>
@@ -22,7 +22,7 @@
         .main-btn { width: 100%; background: var(--glass); color: var(--text); border: 1px solid var(--border); padding: 18px; border-radius: 18px; font-weight: 600; text-align: left; margin-bottom: 10px; font-size: 16px; }
         .row { display: grid; grid-template-columns: 1.2fr 1fr 1fr 40px; gap: 8px; margin-bottom: 10px; align-items: center; }
         input { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; width: 100%; text-align: center; font-size: 14px; }
-        .summary { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(10,10,10,0.95); border-top: 1px solid var(--border); padding: 20px; border-radius: 25px 25px 0 0; z-index: 100; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
+        .summary { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(10,10,10,0.95); border-top: 1px solid var(--border); padding: 20px; border-radius: 25px 25px 0 0; z-index: 100; }
         .s-row { display: grid; grid-template-columns: 1.5fr 1fr; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .val { text-align: right; font-weight: 800; color: var(--accent); font-family: monospace; }
         .hidden { display: none !important; }
@@ -31,7 +31,7 @@
 <body>
 
 <div id="login-screen" class="container" style="justify-content: center;">
-    <h1 style="text-align:center; margin-bottom:30px;">Elite Tészta Pro</h1>
+    <h1 style="text-align:center; margin-bottom:30px;">Tészta Pro 2.0</h1>
     <input type="text" id="login-user" placeholder="Felhasználó" style="margin-bottom:10px;">
     <input type="password" id="login-pass" placeholder="Jelszó" style="margin-bottom:20px;">
     <button onclick="handleLogin()" style="background:var(--accent); color:black; border:none; padding:18px; border-radius:15px; font-weight:bold; width:100%;">BELÉPÉS</button>
@@ -43,9 +43,7 @@
         <h1 id="title">Receptek</h1>
         <button class="icon-btn" onclick="addItems()">+</button>
     </div>
-    
     <div id="list-view"></div>
-    
     <div id="detail-view" class="hidden" style="padding-bottom: 250px;">
         <div id="items-list"></div>
         <div id="summary-box" class="summary"></div>
@@ -67,7 +65,7 @@
             user = { name: u };
             localStorage.setItem('teszta_session', JSON.stringify(user));
             init();
-        } else alert("Hibás belépés!");
+        } else alert("Hiba!");
     }
 
     function init() {
@@ -77,22 +75,22 @@
     }
 
     async function load() {
-        const res = await fetch(`${DB}teszta_v2/${user.name}.json`);
+        const res = await fetch(`${DB}teszta_v3/${user.name}.json`); // v3-ra váltunk, h tiszta legyen
         data = await res.json() || {};
         render();
     }
 
     async function save() {
-        await fetch(`${DB}teszta_v2/${user.name}.json`, { method: 'PUT', body: JSON.stringify(data) });
+        await fetch(`${DB}teszta_v3/${user.name}.json`, { method: 'PUT', body: JSON.stringify(data) });
         render();
     }
 
     function addItems() {
-        const n = prompt(activeId ? "Termék neve (pl. Nagy kenyér):" : "Recept neve (pl. Kovászos):");
+        const n = prompt(activeId ? "Termék neve:" : "Recept neve:");
         if (!n) return;
         if (!activeId) {
             const id = "r" + Date.now();
-            data[id] = { name: n, items: [], recipe: [{n:"Liszt", p:100}, {n:"Víz", p:60}, {n:"Só", p:2}, {n:"Élesztő", p:2}] };
+            data[id] = { name: n, items: [], recipe: [{name:"Liszt", szazalek:100}, {name:"Víz", szazalek:60}, {name:"Só", szazalek:2}, {name:"Élesztő", szazalek:2}] };
         } else {
             data[activeId].items.push({ name: n, suly: 115, db: 10 });
         }
@@ -115,10 +113,10 @@
             title.innerText = r.name;
             document.getElementById('items-list').innerHTML = r.items.map((it, i) => `
                 <div class="row">
-                    <span style="font-size:12px; white-space:nowrap; overflow:hidden;">${it.name}</span>
+                    <span style="font-size:12px;">${it.name}</span>
                     <input type="number" value="${it.suly}" onchange="data['${activeId}'].items[${i}].suly=this.value; save()">
                     <input type="number" value="${it.db}" onchange="data['${activeId}'].items[${i}].db=this.value; save()">
-                    <button onclick="data['${activeId}'].items.splice(${i},1); save()" style="color:var(--danger); border:none; background:none; font-size:22px;">×</button>
+                    <button onclick="delete data['${activeId}'].items[${i}]; data['${activeId}'].items=data['${activeId}'].items.filter(x=>x); save()" style="color:var(--danger); border:none; background:none; font-size:20px;">×</button>
                 </div>`).join('');
             calc();
         }
@@ -126,28 +124,16 @@
 
     function calc() {
         const r = data[activeId];
-        let osszTesztaKg = 0;
-        
-        // 1. Összes tészta súlya (T)
-        r.items.forEach(it => {
-            osszTesztaKg += (Number(it.suly) * Number(it.db)) / 100;
-        });
+        let T = 0;
+        r.items.forEach(it => T += (Number(it.suly) * Number(it.db)) / 100);
 
-        // 2. Össz szorzó kiszámítása (pl. 1.64L)
-        let osszSzorzo = r.recipe.reduce((sum, ing) => sum + (Number(ing.p) / 100), 0);
-        
-        // 3. Liszt súlya (L = T / 1.64)
-        const lisztSuly = osszTesztaKg / osszSzorzo;
+        let osszSzazalek = r.recipe.reduce((s, ing) => s + (Number(ing.szazalek) / 100), 0);
+        const L = T / osszSzazalek;
 
-        let h = `<div style="font-size:11px; color:var(--gray); margin-bottom:8px;">ÖSSZ TÉSZTA: ${osszTesztaKg.toFixed(2)} kg</div>`;
-        
-        // 4. Összetevők kiszámítása a te képleteddel
+        let h = `<div style="font-size:11px; color:var(--gray); margin-bottom:8px;">ÖSSZSÚLY (T): ${T.toFixed(2)} kg</div>`;
         r.recipe.forEach(ing => {
-            const alapanyagKg = lisztSuly * (Number(ing.p) / 100);
-            h += `<div class="s-row">
-                    <span>${ing.n} (${ing.p}%)</span>
-                    <span class="val">${alapanyagKg.toFixed(3)} kg</span>
-                  </div>`;
+            const kg = L * (Number(ing.szazalek) / 100);
+            h += `<div class="s-row"><span>${ing.name} (${ing.szazalek}%)</span><span class="val">${kg.toFixed(3)} kg</span></div>`;
         });
         document.getElementById('summary-box').innerHTML = h;
     }
