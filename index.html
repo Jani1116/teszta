@@ -16,12 +16,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        /* ÚJ, MODERN DIZÁJN (A KÉP ALAPJÁN) */
         :root {
             --bg: #000000;
-            --glass: rgba(28, 28, 30, 0.6); /* Üveghatás alapszíne */
-            --border: rgba(255, 255, 255, 0.08); /* Nagyon finom keret */
-            --accent: #30d158; /* iOS Zöld */
+            --glass: rgba(28, 28, 30, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #30d158;
             --text: #ffffff;
             --gray: #8e8e93;
             --danger: #ff453a;
@@ -30,12 +29,12 @@
         * { box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
             margin: 0;
             padding: 10px;
-            padding-top: env(safe-area-inset-top); /* Notch kezelése */
+            padding-top: env(safe-area-inset-top);
         }
 
         .container {
@@ -45,7 +44,6 @@
             flex-direction: column;
         }
 
-        /* Fejléc stílusa a képről */
         .header-bar {
             display: flex;
             justify-content: space-between;
@@ -54,12 +52,7 @@
             margin-bottom: 15px;
         }
 
-        h1 {
-            font-size: 22px;
-            margin: 0;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
+        h1 { font-size: 22px; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
 
         .icon-btn {
             background: none;
@@ -70,7 +63,6 @@
             cursor: pointer;
         }
 
-        /* Modern Kártya stílus (Glassmorphism) */
         .card {
             background: var(--glass);
             backdrop-filter: blur(15px);
@@ -81,7 +73,6 @@
             margin-bottom: 12px;
         }
 
-        /* Gombok stílusa a képről */
         .main-btn {
             width: 100%;
             background: var(--glass);
@@ -94,31 +85,13 @@
             text-align: left;
             margin-bottom: 8px;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
-        .main-btn:active {
-            background: rgba(255,255,255,0.1);
-        }
+        .main-btn.active-item { border-left: 4px solid var(--accent); padding-left: 12px; font-weight: 700; }
 
-        .main-btn.active-item {
-            border-left: 4px solid var(--accent);
-            padding-left: 12px;
-            font-weight: 700;
-        }
+        .round-box { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 
-        /* Kerekítés Panel */
-        .round-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .round-opts {
-            display: flex;
-            gap: 10px;
-        }
+        .round-opts { display: flex; gap: 10px; }
 
         .round-opt {
             display: flex;
@@ -133,59 +106,18 @@
             border-radius: 10px;
         }
 
-        .round-opt.active {
-            color: var(--accent);
-            background: rgba(48, 209, 88, 0.15);
-        }
-
+        .round-opt.active { color: var(--accent); background: rgba(48, 209, 88, 0.15); }
         .round-opt input { display: none; }
 
-        .step-ui {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 3px;
-        }
+        .step-ui { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 3px; }
+        .step-btn { background: none; border: none; color: var(--accent); width: 36px; height: 36px; font-size: 22px; font-weight: bold; cursor: pointer; }
 
-        .step-btn {
-            background: none;
-            border: none;
-            color: var(--accent);
-            width: 36px;
-            height: 36px;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* Lista Sorok a kalkulátorban */
-        .list-row {
-            display: grid;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
+        .list-row { display: grid; gap: 10px; align-items: center; margin-bottom: 8px; }
         .grid-calc { grid-template-columns: 1.8fr 1fr 1fr 40px; }
 
-        .data-tag {
-            background: rgba(255,255,255,0.05);
-            color: var(--text);
-            padding: 14px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .data-tag.value {
-            color: var(--accent);
-            font-weight: 600;
-        }
+        .data-tag { background: rgba(255,255,255,0.05); color: var(--text); padding: 14px; border-radius: 12px; text-align: center; font-size: 14px; font-weight: 500; }
+        .data-tag.value { color: var(--accent); font-weight: 600; }
         
-        /* Összetétel Panel (Rögzített alul) */
         .summary-panel {
             position: fixed;
             bottom: 0;
@@ -193,7 +125,7 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 500px;
-            background: rgba(10, 10, 10, 0.9);
+            background: rgba(10, 10, 10, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--border);
@@ -201,37 +133,15 @@
             padding-bottom: calc(15px + env(safe-area-inset-bottom));
             border-radius: 24px 24px 0 0;
             z-index: 100;
-            box-sizing: border-box;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
 
-        .summary-header {
-            font-weight: 700;
-            color: var(--text);
-            font-size: 14px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .summary-row {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr 1.2fr;
-            padding: 6px 0;
-            font-size: 15px;
-        }
-
-        .v-orig { color: var(--gray); text-align: right; font-size: 13px; padding-right: 5px; }
+        .summary-header { font-weight: 700; color: var(--text); font-size: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .summary-row { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; padding: 6px 0; font-size: 15px; }
+        .v-orig { color: var(--gray); text-align: right; font-size: 13px; }
         .v-round { color: var(--accent); text-align: right; font-weight: 700; }
 
         .hidden { display: none !important; }
-        
-        /* Tartalmi terület görgetése */
-        #view-details {
-            padding-bottom: 260px; /* Hely az alsó panelnek */
-        }
+        #view-details { padding-bottom: 280px; }
     </style>
 </head>
 <body>
@@ -244,8 +154,7 @@
     </div>
 
     <div id="view-main">
-        <div id="pasta-list">
-            </div>
+        <div id="pasta-list"></div>
     </div>
 
     <div id="view-details" class="hidden">
@@ -256,40 +165,57 @@
             </div>
             <div id="stepper" class="step-ui hidden">
                 <button class="step-btn" onclick="modifyOffset(-1)">−</button>
-                <span id="offset-lbl" style="color:var(--accent); font-weight:700; min-width:50px; text-align:center; font-size:15px;">+0 kg</span>
+                <span id="offset-lbl" style="color:var(--accent); font-weight:700; min-width:50px; text-align:center;">+0 kg</span>
                 <button class="step-btn" onclick="modifyOffset(1)">+</button>
             </div>
         </div>
 
-        <div id="rows-container">
-            </div>
+        <div id="rows-container"></div>
 
-        <div id="summary-panel" class="summary-panel hidden">
-            </div>
+        <div id="summary-panel" class="summary-panel hidden"></div>
     </div>
 </div>
 
 <script>
-    // --- EREDETI LOGIKA (Firebase és Kalkulátor) ---
     const DB_URL = "https://kiadaskoveto-2e474-default-rtdb.firebaseio.com/";
-    
-    // Teszt adatok, ha nincs localStorage (fejlesztéshez)
-    if(!localStorage.getItem('teszta_session')) {
-        localStorage.setItem('teszta_session', JSON.stringify({name: 'teszt_user'}));
-    }
-    
-    let currentUser = JSON.parse(localStorage.getItem('teszta_session'));
+    let currentUser = JSON.parse(localStorage.getItem('teszta_session')) || {name: "GUEST"};
     let db = {};
     let state = { view: 'main', activeId: null, round: null, offset: 0 };
 
     async function loadData() {
-        try {
-            const res = await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`);
-            db = await res.json() || {};
-            render();
-        } catch (error) {
-            console.error("Hiba az adatok betöltésekor:", error);
-            document.getElementById('pasta-list').innerHTML = '<div class="card" style="color:var(--danger)">Hiba a hálózati kapcsolatban.</div>';
+        const res = await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`);
+        db = await res.json() || {};
+        render();
+    }
+
+    async function saveData() {
+        await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`, {
+            method: 'PUT',
+            body: JSON.stringify(db)
+        });
+        render();
+    }
+
+    async function headerAdd() {
+        const nev = prompt("Új tészta neve:");
+        if (!nev) return;
+        const id = "t" + Date.now();
+        db[id] = {
+            name: nev,
+            items: [{ name: "Alap", suly: 10, db: 1 }],
+            recipe: [
+                { name: "Liszt", perc: 100 },
+                { name: "Víz", perc: 60 },
+                { name: "Só", perc: 2 }
+            ]
+        };
+        await saveData();
+    }
+
+    async function delRow(index) {
+        if (confirm("Törlöd ezt a sort?")) {
+            db[state.activeId].items.splice(index, 1);
+            await saveData();
         }
     }
 
@@ -297,7 +223,8 @@
         if (state.round === val) { state.round = null; state.offset = 0; }
         else { 
             state.round = val; state.offset = 0;
-            document.getElementById(val === 0.5 ? 'c10' : 'c05').checked = false;
+            if(val === 0.5 && document.getElementById('c10')) document.getElementById('c10').checked = false;
+            if(val === 1.0 && document.getElementById('c05')) document.getElementById('c05').checked = false;
         }
         render();
     }
@@ -306,105 +233,60 @@
 
     function doCalc() {
         const p = db[state.activeId];
-        if (!p || !p.recipe || p.recipe.length === 0) return;
-
+        if (!p || !p.recipe) return;
         let totalSulyDk = 0;
         (p.items || []).forEach(i => totalSulyDk += (parseFloat(i.suly) * parseFloat(i.db)));
         let kgOrig = totalSulyDk / 100;
-
         let recipeSumPerc = 0;
         p.recipe.forEach(r => recipeSumPerc += parseFloat(r.perc));
         let unitOrig = recipeSumPerc > 0 ? (kgOrig / recipeSumPerc) : 0;
-
-        // Kerekítés alapja: az első sor (Liszt)
         let lisztPerc = parseFloat(p.recipe[0].perc);
         let lisztKgOrig = unitOrig * lisztPerc;
-        
         let unitFinal = unitOrig;
         let isActive = state.round !== null;
-
         if (isActive) {
             let base = Math.ceil(lisztKgOrig / state.round) * state.round;
             let lisztKgFinal = base + (state.offset * state.round);
             unitFinal = lisztPerc > 0 ? (lisztKgFinal / lisztPerc) : 0;
         }
-
         let kgFinalTotal = unitFinal * recipeSumPerc;
-        let diff = kgFinalTotal - kgOrig;
-
-        // ÚJ, MODERN ÖSSZEFOGLALÓ PANEL HTML
-        let h = `<div class="summary-header">
-            <span>ÖSSZETÉTEL (${kgOrig.toFixed(2)} kg)</span>
-            ${isActive ? `<span style="color:var(--accent)">+ (${diff.toFixed(2)} kg tészta)</span>` : ''}
-        </div>`;
-
+        let h = `<div class="summary-header"><span>ÖSSZETÉTEL (${kgOrig.toFixed(2)} kg)</span></div>`;
         p.recipe.forEach(ing => {
             let oS = unitOrig * parseFloat(ing.perc);
             let rS = unitFinal * parseFloat(ing.perc);
-            h += `<div class="summary-row">
-                <span>${ing.name}</span>
-                <span class="v-orig">${isActive ? oS.toFixed(3) + ' kg' : ''}</span>
-                <span class="v-round">${rS.toFixed(3)} kg</span>
-            </div>`;
+            h += `<div class="summary-row"><span>${ing.name}</span><span class="v-orig">${isActive ? oS.toFixed(3) : ''}</span><span class="v-round">${rS.toFixed(3)} kg</span></div>`;
         });
-
         document.getElementById('summary-panel').innerHTML = h;
         document.getElementById('stepper').classList.toggle('hidden', !isActive);
-        
         if(isActive) {
             document.getElementById('offset-lbl').innerText = (state.offset >= 0 ? "+" : "") + (state.offset * state.round).toFixed(1) + " kg";
             document.getElementById('l05').className = state.round === 0.5 ? "round-opt active" : "round-opt";
             document.getElementById('l10').className = state.round === 1.0 ? "round-opt active" : "round-opt";
-        } else {
-            document.getElementById('l05').className = "round-opt";
-            document.getElementById('l10').className = "round-opt";
         }
     }
 
-    // ÚJ RENDER FÜGGVÉNY (A MODERN ELEMEKKEL)
     function render() {
         if (state.view === 'main') {
             document.getElementById('view-main').classList.remove('hidden');
             document.getElementById('view-details').classList.add('hidden');
             document.getElementById('back-btn').classList.add('hidden');
-            document.getElementById('summary-panel').classList.add('hidden'); // Főoldalon ne látsszon
+            document.getElementById('summary-panel').classList.add('hidden');
             document.getElementById('main-title').innerText = "Tészták";
-            
             let h = '';
-            const sortedIds = Object.keys(db).sort();
-            
-            if(sortedIds.length === 0) {
-                h = '<div class="card" style="text-align:center; color:var(--gray);">Nincsenek tészták. Nyomj a + gombra.</div>';
-            } else {
-                sortedIds.forEach(id => {
-                    h += `<button class="main-btn" onclick="openCalc('${id}')">${db[id].name}</button>`;
-                });
-            }
-            document.getElementById('pasta-list').innerHTML = h;
-            
+            Object.keys(db).sort().forEach(id => {
+                h += `<button class="main-btn" onclick="openCalc('${id}')">${db[id].name}</button>`;
+            });
+            document.getElementById('pasta-list').innerHTML = h || '<div class="card">Nincs tészta.</div>';
         } else {
             document.getElementById('view-main').classList.add('hidden');
             document.getElementById('view-details').classList.remove('hidden');
             document.getElementById('back-btn').classList.remove('hidden');
             document.getElementById('summary-panel').classList.remove('hidden');
-            
             const p = db[state.activeId];
             document.getElementById('main-title').innerText = p.name;
-            
-            // Aktív gomb stílusának beállítása a háttérben (ha visszalépünk)
-            Array.from(document.getElementById('pasta-list').children).forEach(btn => {
-                if(btn.innerText === p.name) btn.classList.add('active-item');
-                else btn.classList.remove('active-item');
-            });
-
             let h = '';
             (p.items || []).forEach((it, i) => {
-                h += `<div class="list-row grid-calc">
-                    <div class="data-tag">${it.name}</div>
-                    <div class="data-tag value">${it.suly} dk</div>
-                    <div class="data-tag value">${it.db} db</div>
-                    <button onclick="delRow(${i})" style="background:none; border:none; color:var(--danger); font-size:24px; cursor:pointer;">−</button>
-                </div>`;
+                h += `<div class="list-row grid-calc"><div class="data-tag">${it.name}</div><div class="data-tag value">${it.suly} dk</div><div class="data-tag value">${it.db} db</div><button onclick="delRow(${i})" style="background:none;border:none;color:var(--danger);font-size:24px;">−</button></div>`;
             });
             document.getElementById('rows-container').innerHTML = h;
             doCalc();
@@ -413,17 +295,7 @@
 
     function openCalc(id) { state.activeId = id; state.view = 'details'; render(); }
     function goHome() { state.view = 'main'; state.round = null; state.offset = 0; render(); }
-    
-    // Üres funkciók a gombokhoz (egyelőre)
-    function headerAdd() { alert('Új tészta hozzáadása funkció nincs implementálva.'); }
-    function delRow(index) { alert('Sor törlése funkció nincs implementálva. Index: ' + index); }
-    
-    // Kezdés
-    if(currentUser) {
-        loadData();
-    } else {
-        document.getElementById('pasta-list').innerHTML = '<div class="card">Kérlek, jelentkezz be.</div>';
-    }
+    loadData();
 </script>
 </body>
 </html>
