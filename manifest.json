@@ -4,12 +4,13 @@
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#30d158",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "1774611523413.png",
       "sizes": "1024*1024",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
