@@ -1,18 +1,23 @@
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open('teszta-store').then((cache) => {
-      return cache.addAll([
-        'index.html',
-        'manifest.json'
-      ]);
+const CACHE_NAME = 'teszta-v1';
+const assets = [
+  './',
+  './index.html',
+  './manifest.json',
+  './1774611523413.png'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(assets);
     })
   );
 });
 
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
     })
   );
 });
