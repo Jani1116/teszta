@@ -19,22 +19,27 @@
         .pasta-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .main-btn { flex-grow: 1; background: var(--glass); color: var(--text); border: 1px solid var(--border); padding: 16px; border-radius: 16px; font-weight: 600; text-align: left; }
         .settings-btn { background: none; border: none; color: var(--gray); font-size: 24px; padding: 10px; cursor: pointer; }
-        .list-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 40px; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .list-row { display: grid; grid-template-columns: 1.3fr 1fr 1fr 40px; gap: 8px; margin-bottom: 8px; align-items: center; }
         .input-wrap { position: relative; display: flex; align-items: center; }
-        .unit-label { position: absolute; right: 10px; font-size: 11px; color: var(--gray); pointer-events: none; }
-        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 14px 35px 14px 10px; border-radius: 12px; outline: none; text-align: center; width: 100%; font-size: 14px; }
-        input[readonly] { border-color: rgba(255,255,255,0.03); }
-        .summary-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(10,10,10,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 15px; border-radius: 24px 24px 0 0; z-index: 100; }
-        .summary-header { font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; }
-        .summary-row { display: grid; grid-template-columns: 1.5fr 1fr; padding: 5px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .v-round { color: var(--accent); text-align: right; font-weight: 700; font-family: monospace; }
+        .unit-label { position: absolute; right: 8px; font-size: 10px; color: var(--gray); pointer-events: none; }
+        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 12px 25px 12px 8px; border-radius: 12px; outline: none; text-align: center; width: 100%; font-size: 14px; }
+        input[readonly] { opacity: 0.7; }
+        
+        /* Alsó Panel - Új dupla oszlopos nézet */
+        .summary-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(10,10,10,0.98); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 15px; border-radius: 24px 24px 0 0; z-index: 100; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
+        .summary-header { display: grid; grid-template-columns: 1.2fr 1fr 1fr; font-weight: 800; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; font-size: 10px; color: var(--gray); }
+        .summary-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; padding: 6px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); align-items: center; }
+        .v-orig { color: var(--text); text-align: right; padding-right: 8px; opacity: 0.9; }
+        .v-round { color: var(--accent); text-align: right; font-weight: 800; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 4px; }
+        
         .hidden { display: none !important; }
         #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; }
-        .round-opt { font-size: 14px; color: var(--gray); padding: 10px 15px; background: rgba(255,255,255,0.05); border-radius: 12px; }
-        .round-opt.active { color: var(--accent); background: rgba(48,209,88,0.15); border: 1px solid var(--accent); }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .modal-content { background: #1c1c1e; padding: 25px; border-radius: 24px; width: 100%; max-width: 350px; border: 1px solid var(--border); }
-        .menu-btn { width: 100%; padding: 18px; margin: 8px 0; border-radius: 16px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: white; font-weight: bold; font-size: 16px; text-align: center; }
+        .round-opt { font-size: 14px; color: var(--gray); padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px solid transparent; }
+        .round-opt.active { color: var(--accent); background: rgba(48,209,88,0.15); border-color: var(--accent); }
+        
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-content { background: #1c1c1e; padding: 25px; border-radius: 24px; width: 90%; max-width: 350px; border: 1px solid var(--border); }
+        .menu-btn { width: 100%; padding: 16px; margin: 6px 0; border-radius: 14px; border: 1px solid var(--border); background: var(--glass); color: white; font-weight: bold; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -43,27 +48,29 @@
 <div id="modal-overlay" class="modal hidden"></div>
 
 <div id="login-screen" class="container" style="justify-content: center; height: 85vh;">
-    <h1 style="text-align:center; margin-bottom:30px;">TÉSZTA PRO</h1>
-    <input type="text" id="login-user" placeholder="Felhasználónév" style="margin-bottom:12px; padding-right:10px;">
-    <input type="password" id="login-pass" placeholder="Jelszó" style="margin-bottom:12px; padding-right:10px;">
-    <button onclick="handleLogin()" style="background:var(--accent); color:white; border:none; padding:18px; border-radius:14px; font-weight:bold; font-size:16px;">BELÉPÉS</button>
+    <h1 style="text-align:center; margin-bottom:20px;">TÉSZTA PRO</h1>
+    <input type="text" id="login-user" placeholder="Felhasználónév" style="margin-bottom:10px;">
+    <input type="password" id="login-pass" placeholder="Jelszó" style="margin-bottom:10px;">
+    <button onclick="handleLogin()" style="background:var(--accent); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold;">BELÉPÉS</button>
 </div>
 
 <div id="app-content" class="container" style="display:none;">
     <div class="header-bar">
-        <button id="back-btn" class="hidden" onclick="goHome()" style="background:none; border:none; color:var(--accent); font-size:28px;">❮</button>
+        <button id="back-btn" class="hidden" onclick="goHome()" style="background:none; border:none; color:var(--accent); font-size:24px;">❮</button>
         <h1 id="main-title">Tészták</h1>
         <button class="icon-btn" onclick="headerAdd()">+</button>
     </div>
+    
     <div id="view-main"><div id="pasta-list"></div></div>
-    <div id="view-details" class="hidden" style="padding-bottom: 240px;">
+    
+    <div id="view-details" class="hidden" style="padding-bottom: 250px;">
         <div class="card" style="display:flex; justify-content:space-around; align-items:center;">
             <div class="round-opt" id="l05" onclick="setRound(0.5)">0.5 kg</div>
             <div class="round-opt" id="l10" onclick="setRound(1.0)">1.0 kg</div>
-            <div id="stepper" class="hidden" style="display:flex; align-items:center; gap:20px;">
-                <button onclick="modifyOffset(-1)" style="color:var(--accent); background:none; border:none; font-size:28px;">−</button>
-                <span id="offset-lbl" style="color:var(--accent); font-weight:bold; font-size:18px;">+0</span>
-                <button onclick="modifyOffset(1)" style="color:var(--accent); background:none; border:none; font-size:28px;">+</button>
+            <div id="stepper" class="hidden" style="display:flex; align-items:center; gap:15px;">
+                <button onclick="modifyOffset(-1)" style="color:var(--accent); background:none; border:none; font-size:24px;">−</button>
+                <span id="offset-lbl" style="color:var(--accent); font-weight:bold;">+0</span>
+                <button onclick="modifyOffset(1)" style="color:var(--accent); background:none; border:none; font-size:24px;">+</button>
             </div>
         </div>
         <div id="rows-container"></div>
@@ -91,8 +98,8 @@
                 currentUser = { name: u };
                 localStorage.setItem('teszta_session', JSON.stringify(currentUser));
                 initApp();
-            } else alert("Hibás belépési adatok!");
-        } catch (e) { alert("Hiba a csatlakozáskor!"); }
+            } else alert("Hiba!");
+        } catch (e) { alert("Hálózati hiba!"); }
         showLoading(false);
     }
 
@@ -121,13 +128,13 @@
 
     function headerAdd() {
         if (state.view === 'main') {
-            const n = prompt("Tészta neve (pl. Kenyér):");
+            const n = prompt("Tészta neve:");
             if (!n) return;
             const id = "t" + Date.now();
             db[id] = { name: n, items: [], recipe: [{name:"Liszt", perc:100}, {name:"Víz", perc:60}, {name:"Só", perc:2}] };
             saveData();
         } else {
-            const n = prompt("Termék neve (pl. 1 kg-os vekni):");
+            const n = prompt("Termék neve (pl. 1kg vekni):");
             if (!n) return;
             db[state.activeId].items.push({ name: n, suly: 115, db: 1 });
             saveData();
@@ -141,8 +148,8 @@
                 <h3 style="margin-top:0;">${db[id].name}</h3>
                 <button class="menu-btn" onclick="renamePasta('${id}')">Átnevezés</button>
                 <button class="menu-btn" onclick="editRecipe('${id}')">Szerkesztés (recept)</button>
-                <button class="menu-btn" onclick="deletePasta('${id}')" style="color:var(--danger); border-color:var(--danger)">Törlés</button>
-                <button class="menu-btn" onclick="closeModal()" style="border:none; margin-top:10px; opacity:0.6;">Bezárás</button>
+                <button class="menu-btn" onclick="deletePasta('${id}')" style="color:var(--danger)">Törlés</button>
+                <button class="menu-btn" onclick="closeModal()" style="border:none; margin-top:10px; opacity:0.5;">Mégse</button>
             </div>
         `;
         modal.classList.remove('hidden');
@@ -151,31 +158,27 @@
     function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
 
     function renamePasta(id) {
-        const n = prompt("Tészta új neve:", db[id].name);
+        const n = prompt("Új név:", db[id].name);
         if(n) { db[id].name = n; saveData(); }
         closeModal();
     }
 
     function deletePasta(id) {
-        if(confirm("Biztosan törlöd ezt a tésztatípust az összes termékkel együtt?")) { delete db[id]; saveData(); }
+        if(confirm("Törlöd?")) { delete db[id]; saveData(); }
         closeModal();
     }
 
     function editRecipe(id) {
         closeModal();
         let r = db[id].recipe;
-        let msg = "RECEPT (Liszt = 100%)\n\nÚj: név,százalék (pl: Olaj,5)\nTörlés: t,sorszám (pl: t,2)\nMódosítás: sorszám,név,százalék\n\nMezők:\n";
+        let msg = "RECEPT (Liszt=100%)\nÚj: név,százalék\nTörlés: t,sorszám\nMódosítás: sorszám,név,százalék\n\n";
         r.forEach((ing, i) => msg += `${i}: ${ing.name} (${ing.perc}%)\n`);
         const val = prompt(msg);
         if (!val) return;
-
         const p = val.split(",");
-        if (p[0] === "t" && r[parseInt(p[1])]) {
-            if(parseInt(p[1]) === 0) alert("A bázis (Liszt) nem törölhető!");
-            else r.splice(parseInt(p[1]), 1);
-        } else if (p.length === 2) {
-            r.push({ name: p[0], perc: parseFloat(p[1]) });
-        } else if (p.length === 3) {
+        if (p[0] === "t" && r[parseInt(p[1])]) r.splice(parseInt(p[1]), 1);
+        else if (p.length === 2) r.push({ name: p[0], perc: parseFloat(p[1]) });
+        else if (p.length === 3) {
             const i = parseInt(p[0]);
             if(r[i]) { r[i].name = p[1]; r[i].perc = parseFloat(p[2]); }
         }
@@ -185,7 +188,7 @@
 
     function updateItem(idx, field, val) {
         if (field === 'suly') {
-            if (!confirm("Biztosan módosítod a termék súlyát?")) { render(); return; }
+            if (!confirm("Biztosan módosítod a súlyt?")) { render(); return; }
         }
         db[state.activeId].items[idx][field] = parseFloat(val) || 0;
         saveData();
@@ -202,7 +205,7 @@
             Object.keys(db).forEach(id => {
                 h += `<div class="pasta-item"><button class="main-btn" onclick="openCalc('${id}')">${db[id].name}</button><button class="settings-btn" onclick="openSettings('${id}')">⚙️</button></div>`;
             });
-            document.getElementById('pasta-list').innerHTML = h || '<div class="card" style="text-align:center; color:var(--gray);">Nincs tészta. Adj hozzá a + gombbal!</div>';
+            document.getElementById('pasta-list').innerHTML = h;
         } else {
             document.getElementById('view-main').classList.add('hidden');
             document.getElementById('view-details').classList.remove('hidden');
@@ -213,10 +216,10 @@
             let h = '';
             p.items.forEach((it, i) => {
                 h += `<div class="list-row">
-                    <div style="font-size:13px; font-weight:700; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${it.name}</div>
+                    <div style="font-size:12px; font-weight:bold;">${it.name}</div>
                     <div class="input-wrap"><input type="number" value="${it.suly}" readonly onclick="this.readOnly=false; this.focus()" onblur="this.readOnly=true; updateItem(${i},'suly',this.value)"><span class="unit-label">dkg</span></div>
                     <div class="input-wrap"><input type="number" value="${it.db}" onchange="updateItem(${i},'db',this.value)"><span class="unit-label">db</span></div>
-                    <button onclick="db[state.activeId].items.splice(${i},1); saveData();" style="color:var(--danger); background:none; border:none; font-size:28px;">−</button>
+                    <button onclick="db[state.activeId].items.splice(${i},1); saveData();" style="color:var(--danger); background:none; border:none; font-size:24px;">−</button>
                 </div>`;
             });
             document.getElementById('rows-container').innerHTML = h;
@@ -228,28 +231,40 @@
         const p = db[state.activeId];
         let totalDkg = 0;
         p.items.forEach(it => totalDkg += (it.suly * it.db));
-        let totalKg = totalDkg / 100; // dkg-ból kg-ba alakítás
+        let totalKg = totalDkg / 100; // Összsúly kg-ban
         
         let sumPerc = 0;
         p.recipe.forEach(r => sumPerc += r.perc);
         
-        // PÉK-SZÁZALÉK SZÁMÍTÁS (A liszt a bázis)
-        // unitWeight = 1% recept-arány súlya kg-ban
-        let unitWeight = totalKg / sumPerc;
+        // Pék-százalék javítva: egységnyi súly = összsúly / összaránnyal (pl. 1.62)
+        let unitWeightOrig = totalKg / sumPerc;
 
+        let unitWeightRound = unitWeightOrig;
         if (state.round) {
-            let lisztPerc = p.recipe[0].perc; // Az első elem a liszt (100%)
-            let targetLisztKg = Math.ceil((unitWeight * lisztPerc) / state.round) * state.round;
-            unitWeight = (targetLisztKg + (state.offset * state.round)) / lisztPerc;
+            let lisztPerc = p.recipe[0].perc; // Liszt mindig az első
+            let targetLisztKg = Math.ceil((unitWeightOrig * lisztPerc) / state.round) * state.round;
+            unitWeightRound = (targetLisztKg + (state.offset * state.round)) / lisztPerc;
         }
 
-        let finalTotalKg = unitWeight * sumPerc;
-        let h = `<div class="summary-header"><span>ÖSSZETÉTEL (${finalTotalKg.toFixed(2)} kg)</span></div>`;
-        p.recipe.forEach(ing => {
-            h += `<div class="summary-row"><span>${ing.name} (${ing.perc}%)</span><span class="v-round">${(unitWeight * ing.perc).toFixed(3)} kg</span></div>`;
-        });
-        document.getElementById('summary-panel').innerHTML = h;
+        let finalTotalKg = unitWeightRound * sumPerc;
         
+        let h = `<div class="summary-header">
+                    <span>ÖSSZETÉTEL</span>
+                    <span style="text-align:right; padding-right:8px;">EREDETI (${totalKg.toFixed(2)}kg)</span>
+                    <span style="text-align:right; color:var(--accent)">KEREKÍTETT (${finalTotalKg.toFixed(2)}kg)</span>
+                 </div>`;
+
+        p.recipe.forEach(ing => {
+            let origVal = (unitWeightOrig * ing.perc).toFixed(3);
+            let roundVal = (unitWeightRound * ing.perc).toFixed(3);
+            h += `<div class="summary-row">
+                    <span>${ing.name} (${ing.perc}%)</span>
+                    <span class="v-orig">${origVal} kg</span>
+                    <span class="v-round">${state.round ? roundVal + ' kg' : '-'}</span>
+                  </div>`;
+        });
+
+        document.getElementById('summary-panel').innerHTML = h;
         document.getElementById('stepper').classList.toggle('hidden', !state.round);
         if(state.round) {
             document.getElementById('offset-lbl').innerText = (state.offset >= 0 ? "+" : "") + (state.offset * state.round).toFixed(1) + " kg";
