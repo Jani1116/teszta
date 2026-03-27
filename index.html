@@ -7,77 +7,65 @@
     <style>
         :root { --bg: #000; --glass: rgba(28,28,30,0.6); --border: rgba(255,255,255,0.08); --accent: #30d158; --text: #fff; --gray: #8e8e93; --danger: #ff453a; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; overflow-x: hidden; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; min-height: 90vh; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5px; }
-        h1 { font-size: 24px; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
-        .icon-btn { background: none; border: none; color: var(--accent); font-size: 32px; cursor: pointer; padding: 5px 15px; }
-        .card { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--border); padding: 15px; margin-bottom: 12px; }
-        
-        /* Lista elemek */
-        .pasta-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .main-btn { flex-grow: 1; background: var(--glass); color: var(--text); border: 1px solid var(--border); padding: 18px; border-radius: 18px; font-weight: 600; text-align: left; font-size: 16px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; }
+        h1 { font-size: 22px; margin: 0; font-weight: 800; }
+        .icon-btn { background: none; border: none; color: var(--accent); font-size: 32px; cursor: pointer; }
+        .card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 18px; border: 1px solid var(--border); padding: 15px; margin-bottom: 12px; }
+        .pasta-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .main-btn { flex-grow: 1; background: var(--glass); color: var(--text); border: 1px solid var(--border); padding: 16px; border-radius: 16px; font-weight: 600; text-align: left; }
         .settings-btn { background: none; border: none; color: var(--gray); font-size: 24px; padding: 10px; cursor: pointer; }
+        .list-row { display: grid; grid-template-columns: 1.3fr 1fr 1fr 40px; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .input-wrap { position: relative; display: flex; }
+        .unit-label { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--gray); pointer-events: none; }
+        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 12px 25px 12px 8px; border-radius: 12px; outline: none; text-align: center; width: 100%; font-size: 14px; }
         
-        /* Kalkulátor sorok */
-        .list-row { display: grid; grid-template-columns: 1.3fr 1fr 1fr 45px; gap: 8px; margin-bottom: 10px; align-items: center; }
-        .input-wrap { position: relative; display: flex; align-items: center; }
-        .unit-label { position: absolute; right: 8px; font-size: 10px; color: var(--gray); pointer-events: none; text-transform: uppercase; }
-        input { background: rgba(255,255,255,0.07); border: 1px solid var(--border); color: white; padding: 14px 28px 14px 10px; border-radius: 14px; outline: none; text-align: center; width: 100%; font-size: 15px; font-weight: 500; }
-        input[readonly] { opacity: 0.6; background: transparent; }
-        
-        /* Recept szerkesztő */
-        .recipe-edit-row { display: grid; grid-template-columns: 1.5fr 1fr 45px; gap: 10px; margin-bottom: 12px; align-items: center; }
-        .recipe-header { display: grid; grid-template-columns: 1.5fr 1fr 45px; font-size: 11px; color: var(--gray); margin-bottom: 8px; padding: 0 5px; font-weight: bold; }
-
-        /* Alsó Panel */
-        .summary-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(15,15,15,0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 1px solid var(--border); padding: 20px; border-radius: 28px 28px 0 0; z-index: 100; box-shadow: 0 -15px 40px rgba(0,0,0,0.6); max-height: 70vh; overflow-y: auto; }
-        .summary-header { display: grid; grid-template-columns: 1.2fr 1fr 1fr; font-weight: 800; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px; font-size: 10px; color: var(--gray); letter-spacing: 0.5px; }
-        .summary-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; padding: 8px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); align-items: center; }
-        .v-orig { color: var(--text); text-align: right; padding-right: 10px; opacity: 0.7; font-family: monospace; }
-        .v-round { color: var(--accent); text-align: right; font-weight: 800; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 6px; font-family: monospace; }
+        .summary-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(10,10,10,0.98); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 15px; border-radius: 24px 24px 0 0; z-index: 100; }
+        .summary-header { display: grid; grid-template-columns: 1.2fr 1fr 1fr; font-weight: 800; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; font-size: 10px; color: var(--gray); }
+        .summary-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; padding: 6px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); align-items: center; }
+        .v-orig { color: var(--text); text-align: right; padding-right: 8px; opacity: 0.9; }
+        .v-round { color: var(--accent); text-align: right; font-weight: 800; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 4px; }
         
         .hidden { display: none !important; }
-        #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; }
+        .round-opt { font-size: 14px; color: var(--gray); padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px solid transparent; flex: 1; text-align: center; }
+        .round-opt.active { color: var(--accent); background: rgba(48,209,88,0.15); border-color: var(--accent); }
         
-        .round-opt { font-size: 14px; color: var(--gray); padding: 12px 18px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid transparent; transition: 0.2s; flex: 1; text-align: center; }
-        .round-opt.active { color: var(--accent); background: rgba(48,209,88,0.15); border-color: var(--accent); font-weight: bold; }
-        
-        /* Modális ablak */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
-        .modal-content { background: #1c1c1e; padding: 25px; border-radius: 28px; width: 100%; max-width: 400px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .menu-btn { width: 100%; padding: 18px; margin: 8px 0; border-radius: 16px; border: 1px solid var(--border); background: var(--glass); color: white; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-content { background: #1c1c1e; padding: 25px; border-radius: 24px; width: 90%; max-width: 400px; border: 1px solid var(--border); }
+        .menu-btn { width: 100%; padding: 16px; margin: 6px 0; border-radius: 14px; border: 1px solid var(--border); background: var(--glass); color: white; font-weight: bold; }
+        .recipe-edit-row { display: grid; grid-template-columns: 1.5fr 1fr 40px; gap: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div id="loading-overlay">SZINKRONIZÁLÁS...</div>
+<div id="loading-overlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:3000;">SZINKRONIZÁLÁS...</div>
 <div id="modal-overlay" class="modal hidden"></div>
 
-<div id="login-screen" class="container" style="justify-content: center; height: 90vh; padding: 20px;">
-    <h1 style="text-align:center; margin-bottom:30px; font-size: 32px;">TÉSZTA PRO</h1>
-    <input type="text" id="login-user" placeholder="Felhasználónév" style="margin-bottom:12px;">
-    <input type="password" id="login-pass" placeholder="Jelszó" style="margin-bottom:20px;">
-    <button onclick="handleLogin()" style="background:var(--accent); color:white; border:none; padding:20px; border-radius:16px; font-weight:bold; font-size: 18px;">BELÉPÉS</button>
+<div id="login-screen" class="container" style="justify-content: center; height: 85vh;">
+    <h1 style="text-align:center; margin-bottom:20px;">TÉSZTA PRO</h1>
+    <input type="text" id="login-user" placeholder="Felhasználónév" style="margin-bottom:10px;">
+    <input type="password" id="login-pass" placeholder="Jelszó" style="margin-bottom:10px;">
+    <button onclick="handleLogin()" style="background:var(--accent); color:white; border:none; padding:15px; border-radius:12px; font-weight:bold;">BELÉPÉS</button>
 </div>
 
 <div id="app-content" class="container" style="display:none;">
     <div class="header-bar">
-        <button id="back-btn" class="hidden" onclick="goHome()" style="background:none; border:none; color:var(--accent); font-size:28px;">❮</button>
+        <button id="back-btn" class="hidden" onclick="goHome()" style="background:none; border:none; color:var(--accent); font-size:24px;">❮</button>
         <h1 id="main-title">Tészták</h1>
         <button class="icon-btn" onclick="headerAdd()">+</button>
     </div>
     
     <div id="view-main"><div id="pasta-list"></div></div>
     
-    <div id="view-details" class="hidden" style="padding-bottom: 280px;">
-        <div class="card" style="display:flex; justify-content:space-around; align-items:center; gap: 10px;">
+    <div id="view-details" class="hidden" style="padding-bottom: 300px;">
+        <div class="card" style="display:flex; justify-content:space-around; align-items:center; gap:10px;">
             <div class="round-opt" id="l05" onclick="setRound(0.5)">0.5 kg</div>
             <div class="round-opt" id="l10" onclick="setRound(1.0)">1.0 kg</div>
-            <div id="stepper" class="hidden" style="display:flex; align-items:center; gap:10px; flex: 1.5; justify-content: center;">
-                <button onclick="modifyOffset(-1)" style="color:var(--accent); background:none; border:none; font-size:32px; padding: 0 10px;">−</button>
-                <span id="offset-lbl" style="color:var(--accent); font-weight:bold; font-size: 16px; min-width: 60px; text-align: center;">+0</span>
-                <button onclick="modifyOffset(1)" style="color:var(--accent); background:none; border:none; font-size:32px; padding: 0 10px;">+</button>
+            <div id="stepper" class="hidden" style="display:flex; align-items:center; gap:15px;">
+                <button onclick="modifyOffset(-1)" style="color:var(--accent); background:none; border:none; font-size:24px;">−</button>
+                <span id="offset-lbl" style="color:var(--accent); font-weight:bold;">+0</span>
+                <button onclick="modifyOffset(1)" style="color:var(--accent); background:none; border:none; font-size:24px;">+</button>
             </div>
         </div>
         <div id="rows-container"></div>
@@ -105,7 +93,7 @@
                 currentUser = { name: u };
                 localStorage.setItem('teszta_session', JSON.stringify(currentUser));
                 initApp();
-            } else alert("Hibás belépési adatok!");
+            } else alert("Hiba!");
         } catch (e) { alert("Hálózati hiba!"); }
         showLoading(false);
     }
@@ -141,7 +129,7 @@
             db[id] = { name: n, items: [], recipe: [{name:"Liszt", perc:100}, {name:"Víz", perc:60}, {name:"Só", perc:2}] };
             saveData();
         } else {
-            const n = prompt("Termék neve (pl. 1kg vekni):");
+            const n = prompt("Termék neve:");
             if (!n) return;
             db[state.activeId].items.push({ name: n, suly: 100, db: 1 });
             saveData();
@@ -153,77 +141,43 @@
         const modal = document.getElementById('modal-overlay');
         modal.innerHTML = `
             <div class="modal-content">
-                <h3 style="margin: 0 0 20px 0; text-align: center;">${db[id].name}</h3>
+                <h3>${db[id].name}</h3>
                 <button class="menu-btn" onclick="renamePasta('${id}')">Átnevezés</button>
-                <button class="menu-btn" onclick="editRecipe('${id}')" style="border-color: var(--accent);">Recept szerkesztése</button>
+                <button class="menu-btn" onclick="editRecipe('${id}')">Recept szerkesztése</button>
                 <button class="menu-btn" onclick="deletePasta('${id}')" style="color:var(--danger)">Törlés</button>
-                <button class="menu-btn" onclick="closeModal()" style="border:none; margin-top:10px; opacity:0.5;">Mégse</button>
+                <button class="menu-btn" onclick="closeModal()">Mégse</button>
+            </div>
+        `;
+        modal.classList.remove('hidden');
+    }
+
+    function editRecipe(id) {
+        const p = db[id];
+        const modal = document.getElementById('modal-overlay');
+        let rows = `<div style="font-size:11px; color:var(--gray); display:grid; grid-template-columns:1.5fr 1fr 40px; margin-bottom:5px;"><span>ANYAG</span><span>%</span><span></span></div>`;
+        p.recipe.forEach((ing, i) => {
+            rows += `<div class="recipe-edit-row">
+                <input type="text" value="${ing.name}" onchange="db['${id}'].recipe[${i}].name=this.value; saveData();">
+                <input type="number" inputmode="decimal" value="${ing.perc}" onchange="db['${id}'].recipe[${i}].perc=parseFloat(this.value)||0; saveData();">
+                <button onclick="db['${id}'].recipe.splice(${i},1); saveData(); editRecipe('${id}')" style="background:none; border:none; color:var(--danger); font-size:20px;">×</button>
+            </div>`;
+        });
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Recept: ${p.name}</h3>
+                <div style="max-height:300px; overflow-y:auto; margin-bottom:15px;">${rows}</div>
+                <button class="menu-btn" onclick="db['${id}'].recipe.push({name:'Új', perc:0}); saveData(); editRecipe('${id}')" style="color:var(--accent)">+ Új összetevő</button>
+                <button class="menu-btn" onclick="closeModal(); render();">KÉSZ</button>
             </div>
         `;
         modal.classList.remove('hidden');
     }
 
     function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
-
-    function renamePasta(id) {
-        const n = prompt("Új név:", db[id].name);
-        if(n) { db[id].name = n; saveData(); }
-        closeModal();
-    }
-
-    function deletePasta(id) {
-        if(confirm("Biztosan törlöd ezt a tésztát?")) { delete db[id]; saveData(); }
-        closeModal();
-    }
-
-    /* --- ÚJ MODERN RECEPT SZERKESZTŐ --- */
-    function editRecipe(id) {
-        state.activeId = id;
-        const p = db[id];
-        const modal = document.getElementById('modal-overlay');
-        
-        let rowsHtml = `<div class="recipe-header"><span>ÖSSZETEVŐ</span><span>SZÁZALÉK (%)</span><span></span></div>`;
-        
-        p.recipe.forEach((ing, i) => {
-            rowsHtml += `
-                <div class="recipe-edit-row">
-                    <input type="text" value="${ing.name}" onchange="updateRecipeIng(${i}, 'name', this.value)">
-                    <input type="number" inputmode="decimal" value="${ing.perc}" onchange="updateRecipeIng(${i}, 'perc', this.value)">
-                    <button onclick="removeRecipeIng(${i})" style="color:var(--danger); background:none; border:none; font-size:24px;">×</button>
-                </div>`;
-        });
-
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 450px; width: 95%;">
-                <h3 style="margin:0 0 15px 0;">${p.name} receptje</h3>
-                <div id="recipe-editor-list" style="max-height: 50vh; overflow-y: auto; margin-bottom: 15px; padding-right: 5px;">${rowsHtml}</div>
-                <button class="menu-btn" onclick="addRecipeIng()" style="color:var(--accent); border-color:var(--accent); background: rgba(48,209,88,0.05);">+ Új összetevő</button>
-                <button class="menu-btn" onclick="closeModal(); render();" style="background: var(--accent); color: white; border: none;">KÉSZ ÉS MENTÉS</button>
-            </div>
-        `;
-        modal.classList.remove('hidden');
-    }
-
-    function updateRecipeIng(idx, field, val) {
-        db[state.activeId].recipe[idx][field] = field === 'perc' ? parseFloat(val) || 0 : val;
-        saveData();
-        editRecipe(state.activeId);
-    }
-
-    function removeRecipeIng(idx) {
-        db[state.activeId].recipe.splice(idx, 1);
-        saveData();
-        editRecipe(state.activeId);
-    }
-
-    function addRecipeIng() {
-        db[state.activeId].recipe.push({ name: "Új anyag", perc: 0 });
-        saveData();
-        editRecipe(state.activeId);
-    }
+    function renamePasta(id) { const n = prompt("Új név:", db[id].name); if(n) {db[id].name=n; saveData();} closeModal(); }
+    function deletePasta(id) { if(confirm("Törlöd?")) {delete db[id]; saveData();} closeModal(); }
 
     function updateItem(idx, field, val) {
-        if (field === 'suly' && !confirm("Biztosan módosítod az egységsúlyt?")) { render(); return; }
         db[state.activeId].items[idx][field] = parseFloat(val) || 0;
         saveData();
     }
@@ -250,10 +204,10 @@
             let h = '';
             p.items.forEach((it, i) => {
                 h += `<div class="list-row">
-                    <div style="font-size:13px; font-weight:bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${it.name}</div>
-                    <div class="input-wrap"><input type="number" inputmode="decimal" value="${it.suly}" readonly onclick="this.readOnly=false; this.focus()" onblur="this.readOnly=true; updateItem(${i},'suly',this.value)"><span class="unit-label">dkg</span></div>
+                    <div style="font-size:12px; font-weight:bold;">${it.name}</div>
+                    <div class="input-wrap"><input type="number" inputmode="decimal" value="${it.suly}" onchange="updateItem(${i},'suly',this.value)"><span class="unit-label">dkg</span></div>
                     <div class="input-wrap"><input type="number" inputmode="decimal" value="${it.db}" onchange="updateItem(${i},'db',this.value)"><span class="unit-label">db</span></div>
-                    <button onclick="db[state.activeId].items.splice(${i},1); saveData();" style="color:var(--danger); background:none; border:none; font-size:28px;">−</button>
+                    <button onclick="db[state.activeId].items.splice(${i},1); saveData();" style="color:var(--danger); background:none; border:none; font-size:24px;">−</button>
                 </div>`;
             });
             document.getElementById('rows-container').innerHTML = h;
@@ -261,41 +215,40 @@
         }
     }
 
-    /* --- JAVÍTOTT SZÁMÍTÁSI LOGIKA --- */
     function doCalc() {
         const p = db[state.activeId];
-        if (!p) return;
+        if (!p || p.recipe.length === 0) return;
 
         let totalDkg = 0;
         p.items.forEach(it => totalDkg += (it.suly * it.db));
-        let totalKg = totalDkg / 100; // Átváltás: 100 dkg = 1 kg
+        let totalKg = totalDkg / 100; // Összsúly kg-ban
         
         let sumPerc = 0;
         p.recipe.forEach(r => sumPerc += r.perc);
         
-        // 1%-nyi tészta súlya kg-ban
-        let unitWeightOrig = totalKg / sumPerc;
+        // Pék-százalék: 1 egység súlya = Összsúly / Összarány (pl. 69kg / 1.64)
+        let oneUnitKg = totalKg / sumPerc;
 
-        let unitWeightRound = unitWeightOrig;
+        let finalUnitKg = oneUnitKg;
         if (state.round) {
-            let lisztPerc = p.recipe[0].perc; // Első összetevő a liszt
-            let targetLisztKg = Math.ceil((unitWeightOrig * lisztPerc) / state.round) * state.round;
-            unitWeightRound = (targetLisztKg + (state.offset * state.round)) / lisztPerc;
+            let lisztPerc = p.recipe[0].perc; // A liszt az első elem
+            let targetLisztKg = Math.ceil((oneUnitKg * lisztPerc) / state.round) * state.round;
+            finalUnitKg = (targetLisztKg + (state.offset * state.round)) / lisztPerc;
         }
 
-        let finalTotalKg = unitWeightRound * sumPerc;
+        let totalCalculatedKg = finalUnitKg * sumPerc;
         
         let h = `<div class="summary-header">
-                    <span>ÖSSZETÉTEL</span>
-                    <span style="text-align:right;">EREDETI (${totalKg.toFixed(2)}kg)</span>
-                    <span style="text-align:right; color:var(--accent)">KEREKÍTETT (${finalTotalKg.toFixed(2)}kg)</span>
+                    <span>ANYAGOK</span>
+                    <span style="text-align:right;">PONTOS (${totalKg.toFixed(2)}kg)</span>
+                    <span style="text-align:right; color:var(--accent)">KEREK (${totalCalculatedKg.toFixed(2)}kg)</span>
                  </div>`;
 
         p.recipe.forEach(ing => {
-            let origVal = (unitWeightOrig * ing.perc).toFixed(3);
-            let roundVal = (unitWeightRound * ing.perc).toFixed(3);
+            let origVal = (oneUnitKg * ing.perc).toFixed(3);
+            let roundVal = (finalUnitKg * ing.perc).toFixed(3);
             h += `<div class="summary-row">
-                    <span style="font-weight:600;">${ing.name} (${ing.perc}%)</span>
+                    <span>${ing.name} (${ing.perc}%)</span>
                     <span class="v-orig">${origVal} kg</span>
                     <span class="v-round">${state.round ? roundVal + ' kg' : '-'}</span>
                   </div>`;
