@@ -15,8 +15,8 @@
     <style>
         :root { --bg: #000; --glass: rgba(28,28,30,0.6); --border: rgba(255,255,255,0.08); --accent: #30d158; --text: #fff; --gray: #8e8e93; --danger: #ff453a; }
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: env(safe-area-inset-top); }
-        .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
+        .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; min-height: 90vh; }
         .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; }
         h1 { font-size: 22px; margin: 0; font-weight: 800; }
         .icon-btn { background: none; border: none; color: var(--accent); font-size: 32px; cursor: pointer; }
@@ -33,14 +33,26 @@
         .summary-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(10,10,10,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 15px; border-radius: 24px 24px 0 0; }
         .summary-header { font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; }
         .summary-row { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; padding: 5px 0; }
-        .v-orig { color: var(--gray); text-align: right; }
         .v-round { color: var(--accent); text-align: right; font-weight: 700; }
         .hidden { display: none !important; }
-        #view-details { padding-bottom: 280px; }
+        #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; }
+        .login-card { justify-content: center; height: 80vh; }
+        input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; outline: none; }
+        .action-btn { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
-<div id="app-content" class="container">
+
+<div id="loading-overlay">SZINKRONIZÁLÁS...</div>
+
+<div id="login-screen" class="container login-card">
+    <h1 style="text-align:center; margin-bottom:20px;">TÉSZTA PRO</h1>
+    <input type="text" id="login-user" placeholder="Felhasználónév (pl. Jani)">
+    <input type="password" id="login-pass" placeholder="Jelszó">
+    <button class="action-btn" onclick="handleLogin()">BELÉPÉS</button>
+</div>
+
+<div id="app-content" class="container" style="display:none;">
     <div class="header-bar">
         <button id="back-btn" class="hidden" onclick="goHome()" style="background:none; border:none; color:var(--accent); font-size:24px;">❮</button>
         <h1 id="main-title">Tészták</h1>
@@ -62,28 +74,58 @@
         <div id="rows-container"></div>
         <div id="summary-panel" class="summary-panel hidden"></div>
     </div>
+    <button onclick="logout()" style="background:none; border:none; color:var(--gray); width:100%; font-size:10px; margin-top: 50px;">Kijelentkezés</button>
 </div>
 
 <script>
     const DB_URL = "https://kiadaskoveto-2e474-default-rtdb.firebaseio.com/";
-    let currentUser = JSON.parse(localStorage.getItem('teszta_session')) || {name: "GUEST"};
+    let currentUser = JSON.parse(localStorage.getItem('teszta_session'));
     let db = {};
     let state = { view: 'main', activeId: null, round: null, offset: 0 };
 
+    function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
+
+    async function handleLogin() {
+        const u = document.getElementById('login-user').value.trim();
+        const p = document.getElementById('login-pass').value.trim();
+        if(!u || !p) return;
+        showLoading(true);
+        try {
+            const res = await fetch(`${DB_URL}shopping_users/${u}.json`);
+            let stored = await res.json();
+            if (stored && String(stored).replace(/"/g, '') === String(p)) {
+                currentUser = { name: u };
+                localStorage.setItem('teszta_session', JSON.stringify(currentUser));
+                initApp();
+            } else { alert("Hibás adatok!"); }
+        } catch (e) { alert("Hiba a belépésnél!"); }
+        showLoading(false);
+    }
+
+    function initApp() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-content').style.display = 'flex';
+        loadData();
+    }
+
     async function loadData() {
+        showLoading(true);
         try {
             const res = await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`);
             db = await res.json() || {};
             render();
         } catch(e) { console.error(e); }
+        showLoading(false);
     }
 
     async function saveData() {
+        showLoading(true);
         await fetch(`${DB_URL}teszta_v2/${currentUser.name}.json`, { method: 'PUT', body: JSON.stringify(db) });
+        showLoading(false);
         render();
     }
 
-    async function headerAdd() {
+    function headerAdd() {
         const nev = prompt("Új tészta neve:");
         if (!nev) return;
         const id = "t" + Date.now();
@@ -92,13 +134,13 @@
             items: [{ name: "Alap", suly: 10, db: 1 }],
             recipe: [{ name: "Liszt", perc: 100 }, { name: "Víz", perc: 60 }, { name: "Só", perc: 2 }]
         };
-        await saveData();
+        saveData();
     }
 
-    async function delRow(index) {
+    function delRow(index) {
         if (confirm("Törlöd?")) {
             db[state.activeId].items.splice(index, 1);
-            await saveData();
+            saveData();
         }
     }
 
@@ -121,7 +163,7 @@
             Object.keys(db).sort().forEach(id => {
                 h += `<button class="main-btn" onclick="openCalc('${id}')">${db[id].name}</button>`;
             });
-            document.getElementById('pasta-list').innerHTML = h || '<div class="card">Nincs tészta.</div>';
+            document.getElementById('pasta-list').innerHTML = h || '<div class="card">Nincs tészta. Nyomj a + gombra!</div>';
         } else {
             document.getElementById('view-main').classList.add('hidden');
             document.getElementById('view-details').classList.remove('hidden');
@@ -154,7 +196,7 @@
         }
         let h = `<div class="summary-header"><span>ÖSSZETÉTEL (${kgOrig.toFixed(2)} kg)</span></div>`;
         p.recipe.forEach(ing => {
-            h += `<div class="summary-row"><span>${ing.name}</span><span class="v-orig">${state.round ? (unitOrig * ing.perc).toFixed(3) : ''}</span><span class="v-round">${(unitFinal * ing.perc).toFixed(3)} kg</span></div>`;
+            h += `<div class="summary-row"><span>${ing.name}</span><span class="v-round">${(unitFinal * ing.perc).toFixed(3)} kg</span></div>`;
         });
         document.getElementById('summary-panel').innerHTML = h;
         document.getElementById('stepper').classList.toggle('hidden', !state.round);
@@ -167,7 +209,9 @@
 
     function openCalc(id) { state.activeId = id; state.view = 'details'; render(); }
     function goHome() { state.view = 'main'; state.round = null; state.offset = 0; render(); }
-    loadData();
+    function logout() { localStorage.removeItem('teszta_session'); location.reload(); }
+
+    if(currentUser) initApp();
 </script>
 </body>
 </html>
