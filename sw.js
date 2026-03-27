@@ -1,23 +1,12 @@
-const CACHE_NAME = 'teszta-v3';
-const assets = [
-  './',
-  './index.html',
-  './manifest.json',
-  './1774611523413.png'
-];
+const CACHE_NAME = 'teszta-v4';
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(assets);
-    })
-  );
+  self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
+  // Mindig a hálózatról próbálja, ha nincs net, akkor a cache-ből
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
