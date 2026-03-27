@@ -1,0 +1,15 @@
+{
+  "name": "Elite Tészta Pro 2026",
+  "short_name": "Tészta Pro",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#30d158",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1024*1024",
+      "type": "image/png"
+    }
+  ]
+}
