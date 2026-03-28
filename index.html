@@ -18,31 +18,26 @@
         .item-card { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 10px; box-sizing: border-box; outline: none; }
         .main-btn { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
-        .add-btn { background: var(--accent); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; cursor: pointer; }
+        .add-btn { background: var(--accent); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; cursor: pointer; display:flex; align-items:center; justify-content:center; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; padding: 20px; align-items: center; justify-content: center; }
         .modal-content { background: #1c1c1e; padding: 20px; border-radius: 20px; width: 100%; max-width: 350px; border: 1px solid var(--border); }
         .hidden { display: none; }
-        
-        /* Kalkulátor Táblázat */
         .calc-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .calc-table th { text-align: left; color: var(--gray); padding-bottom: 5px; font-weight: normal; }
         .calc-table td { padding: 8px 0; border-bottom: 1px solid var(--border); }
         .mod-val { color: var(--accent); font-weight: bold; text-align: right; }
         .diff-label { font-size: 11px; color: var(--success); }
-        
-        /* Rács elrendezések */
-        .grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 5px; align-items: center; margin-bottom: 5px; }
-        .grid-calc { display: grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap: 5px; align-items: center; }
-
-        /* Kerekítő Panel */
         .round-panel { background: rgba(255,159,10,0.1); padding: 12px; border-radius: 15px; border: 1px solid var(--accent); margin: 15px 0; }
         .step-btn { background: var(--accent); border: none; color: white; width: 30px; height: 30px; border-radius: 5px; font-weight: bold; cursor: pointer; }
         #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; color: var(--accent); }
+        .recipe-grid { display: grid; grid-template-columns: 2fr 1.2fr 40px; gap: 8px; align-items: center; margin-bottom: 10px; }
+        .unit-wrap { position: relative; display: flex; align-items: center; }
+        .unit-wrap::after { content: '%'; position: absolute; right: 10px; color: var(--gray); font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div id="loading-overlay">ADATOK FRISSÍTÉSE...</div>
+<div id="loading-overlay">ADATOK...</div>
 
 <div id="login-screen" class="container" style="justify-content: center;">
     <h1 style="text-align:center; color:var(--accent)">TÉSZTA MESTER</h1>
@@ -59,26 +54,39 @@
     <div id="dough-list"></div>
 </div>
 
+<div id="view-recipe" class="container hidden">
+    <div class="header">
+        <div><h2 id="recipe-name">Recept</h2><span style="font-size:10px; color:var(--gray)">(anyagnorma)</span></div>
+        <button class="add-btn" onclick="openModal('modal-add-ingredient')">+</button>
+    </div>
+    <div id="ingredient-list"></div>
+    <button class="main-btn" style="background:var(--gray)" onclick="showMain()">VISSZA</button>
+</div>
+
 <div id="view-products" class="container hidden">
     <div class="header">
         <h2 id="prod-dough-name">Tészta</h2>
         <button class="add-btn" onclick="openModal('modal-add-product')">+</button>
     </div>
-    
     <div id="product-list"></div>
-
     <div class="round-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <strong>Kerekítés (0.5kg / 50g)</strong>
             <input type="checkbox" id="round-check" style="width:25px; height:25px;" onchange="renderCalculation()">
         </div>
-        <div id="calc-summary" style="font-size: 16px; font-weight: bold; border-bottom: 1px solid var(--accent); padding-bottom: 5px;">
-            Össztészta: 0 kg
-        </div>
+        <div id="calc-summary" style="font-size: 16px; font-weight: bold; border-bottom: 1px solid var(--accent); padding-bottom: 5px;"></div>
         <table class="calc-table" id="calc-body"></table>
     </div>
-
     <button class="main-btn" style="background:var(--gray)" onclick="showMain()">VISSZA</button>
+</div>
+
+<div id="modal-new-dough" class="modal">
+    <div class="modal-content">
+        <h3>Új tészta</h3>
+        <input type="text" id="new-dough-name" style="width:100%" placeholder="Tészta neve">
+        <button class="main-btn" onclick="saveNewDough()">MENTÉS</button>
+        <button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button>
+    </div>
 </div>
 
 <div id="modal-dough-menu" class="modal">
@@ -93,10 +101,20 @@
 <div id="modal-add-product" class="modal">
     <div class="modal-content">
         <h3>Új termék</h3>
-        <input type="text" id="p-name" placeholder="Név (pl. Zsemle)" style="width:100%">
+        <input type="text" id="p-name" placeholder="Név" style="width:100%">
         <input type="number" id="p-weight" placeholder="Súly (dkg)" style="width:100%">
         <input type="number" id="p-qty" placeholder="Mennyiség (db)" style="width:100%">
         <button class="main-btn" onclick="saveProduct()">HOZZÁADÁS</button>
+        <button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button>
+    </div>
+</div>
+
+<div id="modal-add-ingredient" class="modal">
+    <div class="modal-content">
+        <h3>Új alapanyag</h3>
+        <input type="text" id="ing-name" placeholder="Név" style="width:100%">
+        <input type="number" id="ing-perc" placeholder="Százalék" style="width:100%">
+        <button class="main-btn" onclick="saveIngredient()">HOZZÁADÁS</button>
         <button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button>
     </div>
 </div>
@@ -110,7 +128,6 @@
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
 
-    // LOGIN & ALAPOK
     async function handleLogin() {
         const u = document.getElementById('login-user').value.trim();
         const p = document.getElementById('login-pass').value.trim();
@@ -128,9 +145,10 @@
     }
 
     function initApp() { document.getElementById('login-screen').classList.add('hidden'); showMain(); }
+    
     function showMain() { 
+        document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
         document.getElementById('view-main').classList.remove('hidden'); 
-        document.getElementById('view-products').classList.add('hidden');
         loadDoughs(); 
     }
 
@@ -141,19 +159,73 @@
         const list = document.getElementById('dough-list');
         list.innerHTML = "";
         if(data) {
-            Object.keys(data).forEach(id => {
-                list.innerHTML += `<div class="item-card"><span onclick="showProducts('${id}', '${data[id].name}')" style="flex:1; font-weight:bold;">${data[id].name}</span><button style="background:none; border:none; font-size:20px;" onclick="openDoughMenu('${id}', '${data[id].name}')">⚙️</button></div>`;
+            Object.keys(data).sort((a,b)=>data[a].name.localeCompare(data[b].name)).forEach(id => {
+                list.innerHTML += `<div class="item-card"><span onclick="showProducts('${id}', '${data[id].name}')" style="flex:1; font-weight:bold; font-size:16px;">${data[id].name}</span><button style="background:none; border:none; font-size:20px;" onclick="openDoughMenu('${id}', '${data[id].name}')">⚙️</button></div>`;
             });
         }
         showLoading(false);
     }
 
-    // TERMÉKEK ÉS SZÁMÍTÁS
+    async function saveNewDough() {
+        const n = document.getElementById('new-dough-name').value;
+        if(!n) return;
+        showLoading(true);
+        await fetch(`${DB_URL}teszta_master/${currentUser.name}.json`, { method: 'POST', body: JSON.stringify({name:n, recept:{"liszt":{nev:"Liszt", szazalek:100, sorrend:0}}}) });
+        closeModal(); loadDoughs();
+    }
+
+    function openDoughMenu(id, name) { activeId = id; activeName = name; document.getElementById('menu-title').innerText = name; openModal('modal-dough-menu'); }
+
+    // RECEPT SZERKESZTŐ
+    async function openRecipeEditor() {
+        closeModal();
+        document.getElementById('view-main').classList.add('hidden');
+        document.getElementById('view-recipe').classList.remove('hidden');
+        document.getElementById('recipe-name').innerText = activeName;
+        loadIngredients();
+    }
+
+    async function loadIngredients() {
+        showLoading(true);
+        const res = await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept.json`);
+        const data = await res.json();
+        const list = document.getElementById('ingredient-list');
+        list.innerHTML = "";
+        if(data) {
+            Object.keys(data).sort((a,b)=>(data[a].sorrend||0)-(data[b].sorrend||0)).forEach(key => {
+                const isLiszt = data[key].nev.toLowerCase() === 'liszt';
+                list.innerHTML += `
+                    <div class="recipe-grid">
+                        <input type="text" value="${data[key].nev}" onchange="updateIng('${key}','nev',this.value)" ${isLiszt?'readonly':''}>
+                        <div class="unit-wrap"><input type="number" value="${data[key].szazalek}" onchange="updateIng('${key}','szazalek',this.value)" ${isLiszt?'readonly':''}></div>
+                        <button onclick="${isLiszt?'':`deleteIng('${key}')`}" style="background:none; border:none;">${isLiszt?'🔒':'🗑️'}</button>
+                    </div>`;
+            });
+        }
+        showLoading(false);
+    }
+
+    async function updateIng(k, f, v) {
+        showLoading(true);
+        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept/${k}/${f}.json`, { method:'PUT', body: JSON.stringify(f==='szazalek'?parseFloat(v):v) });
+        showLoading(false);
+    }
+
+    async function saveIngredient() {
+        const n = document.getElementById('ing-name').value, p = document.getElementById('ing-perc').value;
+        if(!n || !p) return;
+        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept.json`, { method:'POST', body: JSON.stringify({nev:n, szazalek:parseFloat(p), sorrend:Date.now()}) });
+        closeModal(); loadIngredients();
+    }
+
+    async function deleteIng(k) { if(confirm("Törlöd?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept/${k}.json`, {method:'DELETE'}); loadIngredients(); } }
+
+    // TERMÉKEK ÉS KALKULÁCIÓ
     async function showProducts(id, name) {
         activeId = id; activeName = name; manualLisztAdj = 0;
-        document.getElementById('prod-dough-name').innerText = name;
-        document.getElementById('view-main').classList.add('hidden');
+        document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
         document.getElementById('view-products').classList.remove('hidden');
+        document.getElementById('prod-dough-name').innerText = name;
         renderCalculation();
     }
 
@@ -161,99 +233,50 @@
         showLoading(true);
         const res = await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}.json`);
         const data = await res.json();
-        
-        // 1. Össztészta igény kiszámítása
         let totalNeededKg = 0;
         const prodList = document.getElementById('product-list');
         prodList.innerHTML = "";
         if(data.termekek) {
             Object.keys(data.termekek).forEach(pk => {
                 const p = data.termekek[pk];
-                const weightKg = (p.weight * p.qty) / 100;
-                totalNeededKg += weightKg;
-                prodList.innerHTML += `<div class="item-card"><span>${p.name} (${p.weight} dkg)</span><span>${p.qty} db</span><button onclick="deleteProduct('${pk}')" style="background:none; border:none;">🗑️</button></div>`;
+                totalNeededKg += (p.weight * p.qty) / 100;
+                prodList.innerHTML += `<div class="item-card"><span>${p.name} (${p.weight} dkg) x ${p.qty} db</span><button onclick="deleteProduct('${pk}')" style="background:none; border:none;">🗑️</button></div>`;
             });
         }
 
-        // 2. Recept arányok
         let totalPercent = 0;
         if(data.recept) Object.values(data.recept).forEach(r => totalPercent += r.szazalek);
-
-        // 3. Matek
         const lisztNeeded = totalPercent > 0 ? (totalNeededKg / (totalPercent / 100)) : 0;
         let finalLiszt = lisztNeeded + manualLisztAdj;
 
-        // Kerekítés logika
         if(document.getElementById('round-check').checked && finalLiszt > 0) {
-            if(finalLiszt >= 1) finalLiszt = Math.ceil(finalLiszt * 2) / 2;
-            else finalLiszt = Math.ceil(finalLiszt * 20) / 20;
+            finalLiszt = finalLiszt >= 1 ? Math.ceil(finalLiszt * 2) / 2 : Math.ceil(finalLiszt * 20) / 20;
         }
 
         const ratio = finalLiszt / 100;
         const finalTotal = (totalPercent * ratio);
-        const diff = finalTotal - totalNeededKg;
-
-        document.getElementById('calc-summary').innerHTML = `
-            Tészta: ${formatSuly(finalTotal)} 
-            <span class="diff-label">${diff > 0 ? '+' : ''}${formatSuly(diff)}</span>`;
+        document.getElementById('calc-summary').innerHTML = `Tészta: ${formatSuly(finalTotal)} <span class="diff-label">${(finalTotal-totalNeededKg)>0?'+':''}${formatSuly(finalTotal-totalNeededKg)}</span>`;
 
         const calcBody = document.getElementById('calc-body');
-        calcBody.innerHTML = `<tr><th>Alapanyag</th><th>Terv</th><th style="text-align:right">Valóság</th></tr>`;
-        
+        calcBody.innerHTML = "";
         if(data.recept) {
             Object.values(data.recept).forEach(r => {
                 const isLiszt = r.nev.toLowerCase() === 'liszt';
-                const terv = (r.szazalek * (lisztNeeded/100));
-                const valosag = (r.szazalek * ratio);
-                
-                calcBody.innerHTML += `
-                    <tr>
-                        <td>${r.nev} (${r.szazalek}%)</td>
-                        <td style="color:var(--gray)">${formatSuly(terv)}</td>
-                        <td class="mod-val">
-                            ${isLiszt ? `<button class="step-btn" onclick="adjLiszt(-1)">-</button> ` : ''}
-                            ${formatSuly(valosag)}
-                            ${isLiszt ? ` <button class="step-btn" onclick="adjLiszt(1)">+</button>` : ''}
-                        </td>
-                    </tr>`;
+                calcBody.innerHTML += `<tr><td>${r.nev} (${r.szazalek}%)</td><td style="color:var(--gray)">${formatSuly(r.szazalek * (lisztNeeded/100))}</td><td class="mod-val">${isLiszt?`<button class="step-btn" onclick="adjLiszt(-1)">-</button> `:''}${formatSuly(r.szazalek * ratio)}${isLiszt?` <button class="step-btn" onclick="adjLiszt(1)">+</button>`:''}</td></tr>`;
             });
         }
         showLoading(false);
     }
 
-    function formatSuly(kg) {
-        if(Math.abs(kg) < 1 && kg !== 0) return (kg * 1000).toFixed(0) + " g";
-        return kg.toFixed(3) + " kg";
-    }
-
-    function adjLiszt(dir) {
-        // Megnézzük a jelenlegi értéket a lépésközhöz
-        const step = 0.5; // Mivel 1kg felett dolgozunk általában, de a kerekítésnél is ez a váltó
-        manualLisztAdj += (dir * step);
-        renderCalculation();
-    }
-
+    function formatSuly(kg) { return Math.abs(kg) < 1 && kg !== 0 ? (kg * 1000).toFixed(0) + " g" : kg.toFixed(3) + " kg"; }
+    function adjLiszt(dir) { manualLisztAdj += (dir * 0.5); renderCalculation(); }
     async function saveProduct() {
-        const p = {
-            name: document.getElementById('p-name').value,
-            weight: parseFloat(document.getElementById('p-weight').value),
-            qty: parseInt(document.getElementById('p-qty').value)
-        };
-        if(!p.name || !p.weight) return;
-        showLoading(true);
-        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek.json`, { method: 'POST', body: JSON.stringify(p) });
+        const n = document.getElementById('p-name').value, w = document.getElementById('p-weight').value, q = document.getElementById('p-qty').value;
+        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek.json`, { method:'POST', body: JSON.stringify({name:n, weight:parseFloat(w), qty:parseInt(q)}) });
         closeModal(); renderCalculation();
     }
-
-    async function deleteProduct(pk) {
-        if(!confirm("Törlöd a terméket?")) return;
-        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${pk}.json`, { method: 'DELETE' });
-        renderCalculation();
-    }
-
-    function openDoughMenu(id, name) { activeId = id; activeName = name; openModal('modal-dough-menu'); }
-    function openRecipeEditor() { alert("Itt tudnád szerkeszteni a receptet, amit az előbb csináltunk."); }
-    function logout() { localStorage.removeItem('teszta_session'); location.reload(); }
+    async function deleteProduct(pk) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${pk}.json`, { method:'DELETE' }); renderCalculation(); }
+    async function deleteDough() { if(confirm("Törlöd a tésztát?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}.json`, { method:'DELETE' }); closeModal(); showMain(); } }
     if(currentUser) initApp();
 </script>
 </body>
