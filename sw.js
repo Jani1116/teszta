@@ -2,7 +2,7 @@ const CACHE_NAME = 'teszta-master-v7';
 const ASSETS = [
   './index.html',
   './manifest.json',
-  './1774606671886.png'
+  './1774611523413.png'
 ];
 
 self.addEventListener('install', (e) => {
