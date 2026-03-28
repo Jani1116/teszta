@@ -64,7 +64,7 @@
 <div id="view-recipe" class="container hidden">
     <div class="header"><div><h2 id="recipe-name">Recept</h2></div><button class="add-btn" onclick="openModal('modal-add-ingredient')">+</button></div>
     <div id="ingredient-list"></div>
-    <button class="main-btn" style="background:var(--gray)" onclick="showProducts(activeId, activeName)">KÉSZ</button>
+    <button class="main-btn" style="background:var(--gray)" onclick="showProducts(activeId, activeName)">KÉSZ (Vissza)</button>
 </div>
 
 <div id="modal-edit-product" class="modal">
@@ -80,9 +80,11 @@
 
 <div id="modal-new-dough" class="modal"><div class="modal-content"><h3>Új tészta</h3><input type="text" id="new-dough-name" style="width:100%"><button class="main-btn" onclick="saveNewDough()">MENTÉS</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
 <div id="modal-add-product" class="modal"><div class="modal-content"><h3>Új termék</h3><input type="text" id="p-name" placeholder="Név" style="width:100%"><input type="number" id="p-weight" placeholder="Súly (dkg)" style="width:100%"><input type="number" id="p-qty" placeholder="Mennyiség (db)" style="width:100%"><button class="main-btn" onclick="saveProduct()">HOZZÁADÁS</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
+<div id="modal-add-ingredient" class="modal"><div class="modal-content"><h3>Új hozzávaló</h3><input type="text" id="ing-name" placeholder="Név (pl. Víz)" style="width:100%"><input type="number" id="ing-percent" placeholder="Százalék (pl. 60)" style="width:100%"><button class="main-btn" onclick="saveIngredient()">HOZZÁADÁS</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
 <div id="modal-dough-menu" class="modal"><div class="modal-content"><h3 id="menu-title" style="color:var(--accent); text-align:center;">Opciók</h3><button class="main-btn" onclick="openRecipeEditor()">Recept (anyagnorma)</button><button class="main-btn" style="background:var(--danger)" onclick="deleteDough()">Törlés</button><button class="main-btn" style="background:none" onclick="closeModal()">Bezár</button></div></div>
 
 <script>
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
     const DB_URL = "https://kiadaskoveto-2e474-default-rtdb.firebaseio.com/";
     let currentUser = JSON.parse(localStorage.getItem('teszta_session'));
     let activeId = "", activeName = "", manualLisztAdj = 0, currentEditPid = "";
@@ -108,12 +110,7 @@
     }
 
     function initApp() { document.getElementById('login-screen').classList.add('hidden'); showMain(); }
-    
-    function showMain() { 
-        document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-        document.getElementById('view-main').classList.remove('hidden'); 
-        loadDoughs(); 
-    }
+    function showMain() { document.querySelectorAll('.container').forEach(c => c.classList.add('hidden')); document.getElementById('view-main').classList.remove('hidden'); loadDoughs(); }
 
     async function loadDoughs() {
         showLoading(true);
@@ -141,33 +138,23 @@
         const data = await res.json();
         let totalNeededKg = 0;
         const prodList = document.getElementById('product-list'); prodList.innerHTML = "";
-        
         if(data.termekek) {
             Object.keys(data.termekek).forEach(pk => {
                 const p = data.termekek[pk];
                 totalNeededKg += (p.weight * p.qty) / 100;
-                prodList.innerHTML += `
-                    <div class="item-card">
-                        <div style="flex:1"><strong>${p.name}</strong> <small style="color:var(--gray)">${p.weight}dkg</small></div>
-                        <input type="number" class="qty-input" value="${p.qty}" onchange="updateQty('${pk}', this.value)">
-                        <button onclick="openEditProduct('${pk}', '${p.name}', ${p.weight})" style="background:none; border:none; font-size:18px;">⚙️</button>
-                    </div>`;
+                prodList.innerHTML += `<div class="item-card"><div style="flex:1"><strong>${p.name}</strong> <small style="color:var(--gray)">${p.weight}dkg</small></div><input type="number" class="qty-input" value="${p.qty}" onchange="updateQty('${pk}', this.value)"><button onclick="openEditProduct('${pk}', '${p.name}', ${p.weight})" style="background:none; border:none; font-size:18px;">⚙️</button></div>`;
             });
         }
-
         let totalPercent = 0;
         if(data.recept) Object.values(data.recept).forEach(r => totalPercent += r.szazalek);
         const lisztNeeded = totalPercent > 0 ? (totalNeededKg / (totalPercent / 100)) : 0;
         let finalLiszt = lisztNeeded + manualLisztAdj;
-
         if(document.getElementById('round-check').checked && finalLiszt > 0) {
             finalLiszt = finalLiszt >= 1 ? Math.ceil(finalLiszt * 2) / 2 : Math.ceil(finalLiszt * 20) / 20;
         }
-
         const ratio = finalLiszt / 100;
         const finalTotal = (totalPercent * ratio);
         document.getElementById('calc-summary').innerHTML = `Tészta: ${formatSuly(finalTotal)} <small style="color:var(--success)">(${(finalTotal-totalNeededKg)>0?'+':''}${formatSuly(finalTotal-totalNeededKg)})</small>`;
-
         const calcBody = document.getElementById('calc-body'); calcBody.innerHTML = "";
         if(data.recept) {
             Object.values(data.recept).forEach(r => {
@@ -177,44 +164,46 @@
         }
     }
 
-    async function updateQty(pk, val) {
-        const v = parseInt(val) || 0;
-        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${pk}/qty.json`, { method:'PUT', body: v });
-        renderCalculation();
+    async function openRecipeEditor() {
+        closeModal();
+        document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+        document.getElementById('view-recipe').classList.remove('hidden');
+        document.getElementById('recipe-name').innerText = activeName + " Recept";
+        loadIngredients();
     }
 
-    function openEditProduct(pk, name, weight) {
-        currentEditPid = pk;
-        document.getElementById('edit-p-name').value = name;
-        document.getElementById('edit-p-weight').value = weight;
-        openModal('modal-edit-product');
-    }
-
-    async function updateProductData() {
-        const n = document.getElementById('edit-p-name').value;
-        const w = parseFloat(document.getElementById('edit-p-weight').value);
-        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}/name.json`, { method:'PUT', body: JSON.stringify(n) });
-        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}/weight.json`, { method:'PUT', body: w });
-        closeModal(); renderCalculation();
-    }
-
-    async function deleteProduct() {
-        if(confirm("Törlöd a terméket?")) {
-            await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}.json`, { method:'DELETE' });
-            closeModal(); renderCalculation();
+    async function loadIngredients() {
+        const res = await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept.json`);
+        const data = await res.json();
+        const list = document.getElementById('ingredient-list'); list.innerHTML = "";
+        if(data) {
+            Object.keys(data).forEach(id => {
+                list.innerHTML += `<div class="item-card"><div style="flex:1"><strong>${data[id].nev}</strong>: ${data[id].szazalek}%</div><button class="step-btn" style="background:var(--danger)" onclick="deleteIngredient('${id}')">✕</button></div>`;
+            });
         }
     }
 
+    async function saveIngredient() {
+        const n = document.getElementById('ing-name').value, p = parseFloat(document.getElementById('ing-percent').value);
+        if(!n || isNaN(p)) return;
+        await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept.json`, { method:'POST', body: JSON.stringify({nev:n, szazalek:p}) });
+        closeModal(); loadIngredients();
+    }
+
+    async function deleteIngredient(id) {
+        if(confirm("Törlöd?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept/${id}.json`, { method:'DELETE' }); loadIngredients(); }
+    }
+
+    async function updateQty(pk, val) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${pk}/qty.json`, { method:'PUT', body: parseInt(val)||0 }); renderCalculation(); }
+    function openEditProduct(pk, name, weight) { currentEditPid = pk; document.getElementById('edit-p-name').value = name; document.getElementById('edit-p-weight').value = weight; openModal('modal-edit-product'); }
+    async function updateProductData() { const n = document.getElementById('edit-p-name').value, w = parseFloat(document.getElementById('edit-p-weight').value); await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}/name.json`, { method:'PUT', body: JSON.stringify(n) }); await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}/weight.json`, { method:'PUT', body: w }); closeModal(); renderCalculation(); }
+    async function deleteProduct() { if(confirm("Törlöd?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}.json`, { method:'DELETE' }); closeModal(); renderCalculation(); } }
     function formatSuly(kg) { return Math.abs(kg) < 1 && kg !== 0 ? (kg * 1000).toFixed(0) + " g" : kg.toFixed(3) + " kg"; }
     function adjLiszt(dir) { manualLisztAdj += (dir * 0.5); renderCalculation(); }
-    
-    // Alap CRUD műveletek (maradtak a régiek)
-    async function saveNewDough() { const n = document.getElementById('new-dough-name').value; if(!n) return; await fetch(`${DB_URL}teszta_master/${currentUser.name}.json`, { method: 'POST', body: JSON.stringify({name:n, recept:{"liszt":{nev:"Liszt", szazalek:100, sorrend:0}}}) }); closeModal(); loadDoughs(); }
+    async function saveNewDough() { const n = document.getElementById('new-dough-name').value; if(!n) return; await fetch(`${DB_URL}teszta_master/${currentUser.name}.json`, { method: 'POST', body: JSON.stringify({name:n, recept:{"liszt":{nev:"Liszt", szazalek:100}}}) }); closeModal(); loadDoughs(); }
     async function saveProduct() { const n = document.getElementById('p-name').value, w = document.getElementById('p-weight').value, q = document.getElementById('p-qty').value; await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek.json`, { method:'POST', body: JSON.stringify({name:n, weight:parseFloat(w), qty:parseInt(q)}) }); closeModal(); renderCalculation(); }
     async function deleteDough() { if(confirm("Törlöd a tésztát?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}.json`, { method:'DELETE' }); closeModal(); showMain(); } }
     function openDoughMenu(id, name) { activeId = id; activeName = name; document.getElementById('menu-title').innerText = name; openModal('modal-dough-menu'); }
-    function openRecipeEditor() { alert("Itt tudnád szerkeszteni a receptet."); }
-
     if(currentUser) initApp();
 </script>
 </body>
