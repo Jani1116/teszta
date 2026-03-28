@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teszta-master-v1';
+const CACHE_NAME = 'teszta-master-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
