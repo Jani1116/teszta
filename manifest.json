@@ -1,16 +1,16 @@
 {
-  "name": "Elite Tészta Pro 2026",
-  "short_name": "Tészta Pro",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "short_name": "TésztaMester",
+  "name": "Tészta Mester Pro",
   "icons": [
     {
       "src": "1774611523413.png",
-      "sizes": "1024x1024",
       "type": "image/png",
+      "sizes": "1024x1024",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#000000"
 }
