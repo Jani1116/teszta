@@ -4,50 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tészta Mester</title>
+    <link rel="manifest" href="manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').then(reg => {
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  window.location.reload();
+                }
+              });
+            });
+          });
+        });
+      }
+    </script>
     <style>
         :root { 
-            --bg: #000000; --glass: rgba(28, 28, 30, 0.8);
+            --bg: #000; --glass: rgba(28, 28, 30, 0.8);
             --border: rgba(255, 255, 255, 0.1); --accent: #ff9f0a;
-            --text: #ffffff; --success: #30d158; --gray: #8e8e93; --danger: #ff453a;
+            --text: #fff; --success: #30d158; --gray: #8e8e93; --danger: #ff453a;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
-        .container { max-width: 500px; margin: auto; background: var(--glass); backdrop-filter: blur(15px); padding: 20px; border-radius: 30px; border: 1px solid var(--border); min-height: 90vh; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h1 { font-size: 22px; margin: 0; color: var(--accent); font-weight: 800; }
-        .item-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .main-btn { width: 100%; background: var(--accent); color: white; border: none; padding: 16px; border-radius: 18px; font-size: 15px; font-weight: 700; margin-top: 10px; cursor: pointer; }
-        .add-btn { background: var(--accent); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; cursor: pointer; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; padding: 20px; align-items: center; justify-content: center; }
-        .modal-content { background: #1c1c1e; padding: 25px; border-radius: 25px; width: 100%; max-width: 350px; border: 1px solid var(--border); }
-        input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; margin: 10px 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; overflow-x: hidden; }
+        .container { max-width: 500px; margin: auto; background: var(--glass); backdrop-filter: blur(15px); padding: 20px; border-radius: 30px; border: 1px solid var(--border); min-height: 92vh; display: flex; flex-direction: column; }
+        h1 { font-size: 22px; text-align: center; color: var(--accent); font-weight: 800; letter-spacing: 1px; margin-bottom: 20px; }
+        .item-card { background: rgba(255,255,255,0.05); padding: 16px; border-radius: 18px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 14px; border-radius: 14px; margin: 10px 0; box-sizing: border-box; font-size: 16px; outline: none; }
+        .main-btn { width: 100%; background: var(--accent); color: white; border: none; padding: 16px; border-radius: 18px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .add-btn { background: var(--accent); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; padding: 20px; align-items: center; justify-content: center; }
+        .modal-content { background: #1c1c1e; padding: 25px; border-radius: 25px; width: 100%; max-width: 350px; border: 1px solid var(--border); text-align: center; }
         .hidden { display: none; }
-        #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; font-weight: bold; color: var(--accent); }
+        .gear-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
 
 <div id="loading-overlay">SZINKRONIZÁLÁS...</div>
 
-<div id="login-screen" class="container" style="justify-content: center; display: flex; flex-direction: column;">
+<div id="login-screen" class="container" style="justify-content: center;">
     <h1>TÉSZTA MESTER</h1>
-    <input type="text" id="login-user" placeholder="Felhasználónév">
+    <input type="text" id="login-user" placeholder="Felhasználónév" value="Jani">
     <input type="password" id="login-pass" placeholder="Jelszó">
     <button class="main-btn" onclick="handleLogin()">BELÉPÉS</button>
 </div>
 
 <div id="app-content" class="container hidden">
-    <div class="header">
-        <h1 id="user-display">TÉSZTÁK</h1>
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin:0; color: var(--accent);">TÉSZTÁK</h2>
         <button class="add-btn" onclick="openModal('modal-new-dough')">+</button>
     </div>
     <div id="dough-list"></div>
-    <button onclick="logout()" style="background:none; border:none; color:var(--gray); width:100%; margin-top: 20px;">Kijelentkezés</button>
+    <div style="flex-grow: 1;"></div>
+    <button onclick="logout()" style="background:none; border:none; color:var(--gray); font-size:12px; margin-top: 20px;">Kijelentkezés</button>
 </div>
 
 <div id="modal-new-dough" class="modal">
     <div class="modal-content">
-        <h3>Új tészta hozzáadása</h3>
-        <input type="text" id="new-dough-name" placeholder="Tészta neve (pl. Kenyér)">
+        <h3>Új tészta</h3>
+        <input type="text" id="new-dough-name" placeholder="Tészta neve">
         <button class="main-btn" onclick="saveNewDough()">MENTÉS</button>
         <button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button>
     </div>
@@ -55,7 +73,7 @@
 
 <div id="modal-dough-menu" class="modal">
     <div class="modal-content">
-        <h3 id="menu-title">Tészta opciók</h3>
+        <h3 id="menu-title" style="color:var(--accent)">Opciók</h3>
         <button class="main-btn">Átnevezés</button>
         <button class="main-btn">Szerkesztés (anyagnorma)</button>
         <button class="main-btn" style="background:var(--danger)" onclick="deleteDough()">Törlés</button>
@@ -66,26 +84,24 @@
 <script>
     const DB_URL = "https://kiadaskoveto-2e474-default-rtdb.firebaseio.com/";
     let currentUser = JSON.parse(localStorage.getItem('teszta_session'));
-    let activeDoughId = "";
+    let activeId = "";
 
     function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
 
-    // LOGIN
     async function handleLogin() {
         const u = document.getElementById('login-user').value.trim();
         const p = document.getElementById('login-pass').value.trim();
-        if(!u || !p) return;
         showLoading(true);
         try {
             const res = await fetch(`${DB_URL}shopping_users/${u}.json`);
-            const stored = await res.json();
-            if (stored && String(stored).replace(/"/g, '') === String(p)) {
+            let stored = await res.json();
+            if (stored && String(stored).replace(/"/g, '') === p) {
                 currentUser = { name: u };
                 localStorage.setItem('teszta_session', JSON.stringify(currentUser));
                 initApp();
-            } else { alert("Hiba a belépésnél!"); }
+            } else { alert("Hibás adatok!"); }
         } catch (e) { alert("Szerver hiba!"); }
         showLoading(false);
     }
@@ -96,69 +112,56 @@
         loadDoughs();
     }
 
-    // TÉSZTÁK BETÖLTÉSE
     async function loadDoughs() {
         showLoading(true);
         try {
             const res = await fetch(`${DB_URL}teszta_master/${currentUser.name}.json`);
             const data = await res.json();
-            const listCont = document.getElementById('dough-list');
-            listCont.innerHTML = "";
-            
+            const list = document.getElementById('dough-list');
+            list.innerHTML = data ? "" : "<p style='text-align:center; color:var(--gray)'>Nincs még tészta.</p>";
             if(data) {
                 Object.keys(data).forEach(id => {
-                    listCont.innerHTML += `
+                    list.innerHTML += `
                         <div class="item-card">
-                            <div onclick="alert('Itt jönnek majd a termékek: ${data[id].name}')" style="flex-grow:1; font-weight:bold;">
-                                ${data[id].name}
-                            </div>
-                            <button class="gear-btn" style="background:none; border:none; font-size:20px;" onclick="openDoughMenu('${id}', '${data[id].name}')">⚙️</button>
+                            <span style="font-weight:bold; font-size:18px;">${data[id].name}</span>
+                            <button class="gear-btn" onclick="openDoughMenu('${id}', '${data[id].name}')">⚙️</button>
                         </div>`;
                 });
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {}
         showLoading(false);
     }
 
-    // ÚJ TÉSZTA MENTÉSE
     async function saveNewDough() {
         const name = document.getElementById('new-dough-name').value.trim();
         if(!name) return;
         showLoading(true);
         try {
-            // Létrehozzuk az alap receptet a 100%-os liszttel
-            const newDough = {
-                name: name,
-                recept: {
-                    "alap_liszt": { nev: "Liszt", szazalek: 100 }
-                }
-            };
             await fetch(`${DB_URL}teszta_master/${currentUser.name}.json`, {
                 method: 'POST',
-                body: JSON.stringify(newDough)
+                body: JSON.stringify({ name: name, created: new Date().toISOString() })
             });
             document.getElementById('new-dough-name').value = "";
             closeModal();
             loadDoughs();
-        } catch (e) { alert("Hiba a mentésnél!"); }
+        } catch (e) {}
         showLoading(false);
     }
 
     function openDoughMenu(id, name) {
-        activeDoughId = id;
+        activeId = id;
         document.getElementById('menu-title').innerText = name;
         openModal('modal-dough-menu');
     }
 
-    // TÉSZTA TÖRLÉSE
     async function deleteDough() {
-        if(!confirm("Biztosan törlöd a tésztát és minden hozzá tartozó adatot?")) return;
+        if(!confirm("Biztosan törlöd?")) return;
         showLoading(true);
         try {
-            await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeDoughId}.json`, { method: 'DELETE' });
+            await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}.json`, { method: 'DELETE' });
             closeModal();
             loadDoughs();
-        } catch (e) { alert("Hiba a törlésnél!"); }
+        } catch (e) {}
         showLoading(false);
     }
 
