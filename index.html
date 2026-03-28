@@ -67,27 +67,23 @@
     <button class="main-btn" style="background:var(--gray)" onclick="showProducts(activeId, activeName)">KÉSZ (Vissza)</button>
 </div>
 
-<div id="modal-edit-product" class="modal">
-    <div class="modal-content">
-        <h3>Termék módosítása</h3>
-        <input type="text" id="edit-p-name" placeholder="Név" style="width:100%; margin-bottom:10px;">
-        <input type="number" id="edit-p-weight" placeholder="Súly (dkg)" style="width:100%; margin-bottom:10px;">
-        <button class="main-btn" onclick="updateProductData()">MENTÉS</button>
-        <button class="main-btn" style="background:var(--danger)" onclick="deleteProduct()">TERMÉK TÖRLÉSE</button>
-        <button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button>
-    </div>
-</div>
-
 <div id="modal-new-dough" class="modal"><div class="modal-content"><h3>Új tészta</h3><input type="text" id="new-dough-name" style="width:100%"><button class="main-btn" onclick="saveNewDough()">MENTÉS</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
-<div id="modal-add-product" class="modal"><div class="modal-content"><h3>Új termék</h3><input type="text" id="p-name" placeholder="Név" style="width:100%"><input type="number" id="p-weight" placeholder="Súly (dkg)" style="width:100%"><input type="number" id="p-qty" placeholder="Mennyiség (db)" style="width:100%"><button class="main-btn" onclick="saveProduct()">HOZZÁADÁS</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
-<div id="modal-add-ingredient" class="modal"><div class="modal-content"><h3>Új hozzávaló</h3><input type="text" id="ing-name" placeholder="Név (pl. Víz)" style="width:100%"><input type="number" id="ing-percent" placeholder="Százalék (pl. 60)" style="width:100%"><button class="main-btn" onclick="saveIngredient()">HOZZÁADÁS</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
+
 <div id="modal-dough-menu" class="modal"><div class="modal-content"><h3 id="menu-title" style="color:var(--accent); text-align:center;">Opciók</h3><button class="main-btn" onclick="openRecipeEditor()">Recept (anyagnorma)</button><button class="main-btn" style="background:var(--danger)" onclick="deleteDough()">Törlés</button><button class="main-btn" style="background:none" onclick="closeModal()">Bezár</button></div></div>
+
+<div id="modal-add-product" class="modal"><div class="modal-content"><h3>Új termék</h3><input type="text" id="p-name" placeholder="Név" style="width:100%"><input type="number" id="p-weight" placeholder="Súly (dkg)" style="width:100%"><input type="number" id="p-qty" placeholder="Mennyiség (db)" style="width:100%"><button class="main-btn" onclick="saveProduct()">HOZZÁADÁS</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
+
+<div id="modal-edit-product" class="modal"><div class="modal-content"><h3>Termék módosítása</h3><input type="text" id="edit-p-name" style="width:100%; margin-bottom:10px;"><input type="number" id="edit-p-weight" style="width:100%; margin-bottom:10px;"><button class="main-btn" onclick="updateProductData()">MENTÉS</button><button class="main-btn" style="background:var(--danger)" onclick="deleteProduct()">TERMÉK TÖRLÉSE</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
+
+<div id="modal-add-ingredient" class="modal"><div class="modal-content"><h3>Új hozzávaló</h3><input type="text" id="ing-name" placeholder="Név (pl. Só)" style="width:100%"><input type="number" id="ing-percent" placeholder="Százalék (pl. 2)" style="width:100%"><button class="main-btn" onclick="saveIngredient()">HOZZÁADÁS</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
+
+<div id="modal-ing-menu" class="modal"><div class="modal-content"><h3 id="ing-menu-title" style="color:var(--accent); text-align:center;">Összetevő</h3><button class="main-btn" onclick="editIngPrompt()">Módosítás</button><button class="main-btn" style="background:var(--danger)" onclick="deleteIngredient(activeIngId)">Törlés</button><button class="main-btn" style="background:none" onclick="closeModal()">Mégse</button></div></div>
 
 <script>
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
     const DB_URL = "https://kiadaskoveto-2e474-default-rtdb.firebaseio.com/";
     let currentUser = JSON.parse(localStorage.getItem('teszta_session'));
-    let activeId = "", activeName = "", manualLisztAdj = 0, currentEditPid = "";
+    let activeId = "", activeName = "", manualLisztAdj = 0, currentEditPid = "", activeIngId = "";
 
     function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
@@ -164,6 +160,7 @@
         }
     }
 
+    // --- RECEPT KEZELÉS ---
     async function openRecipeEditor() {
         closeModal();
         document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
@@ -178,8 +175,19 @@
         const list = document.getElementById('ingredient-list'); list.innerHTML = "";
         if(data) {
             Object.keys(data).forEach(id => {
-                list.innerHTML += `<div class="item-card"><div style="flex:1"><strong>${data[id].nev}</strong>: ${data[id].szazalek}%</div><button class="step-btn" style="background:var(--danger)" onclick="deleteIngredient('${id}')">✕</button></div>`;
+                list.innerHTML += `<div class="item-card"><div style="flex:1"><strong>${data[id].nev}</strong>: ${data[id].szazalek}%</div><button style="background:none; border:none; font-size:20px;" onclick="openIngMenu('${id}', '${data[id].nev}')">⚙️</button></div>`;
             });
+        }
+    }
+
+    function openIngMenu(id, name) { activeIngId = id; document.getElementById('ing-menu-title').innerText = name; openModal('modal-ing-menu'); }
+
+    async function editIngPrompt() {
+        const n = prompt("Új név:", document.getElementById('ing-menu-title').innerText);
+        const p = prompt("Új százalék:");
+        if(n && p) {
+            await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept/${activeIngId}.json`, { method:'PATCH', body: JSON.stringify({nev:n, szazalek:parseFloat(p)}) });
+            closeModal(); loadIngredients();
         }
     }
 
@@ -191,13 +199,14 @@
     }
 
     async function deleteIngredient(id) {
-        if(confirm("Törlöd?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept/${id}.json`, { method:'DELETE' }); loadIngredients(); }
+        if(confirm("Törlöd az összetevőt?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/recept/${id}.json`, { method:'DELETE' }); closeModal(); loadIngredients(); }
     }
 
+    // --- ALAP FUNKCIÓK ---
     async function updateQty(pk, val) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${pk}/qty.json`, { method:'PUT', body: parseInt(val)||0 }); renderCalculation(); }
     function openEditProduct(pk, name, weight) { currentEditPid = pk; document.getElementById('edit-p-name').value = name; document.getElementById('edit-p-weight').value = weight; openModal('modal-edit-product'); }
     async function updateProductData() { const n = document.getElementById('edit-p-name').value, w = parseFloat(document.getElementById('edit-p-weight').value); await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}/name.json`, { method:'PUT', body: JSON.stringify(n) }); await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}/weight.json`, { method:'PUT', body: w }); closeModal(); renderCalculation(); }
-    async function deleteProduct() { if(confirm("Törlöd?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}.json`, { method:'DELETE' }); closeModal(); renderCalculation(); } }
+    async function deleteProduct() { if(confirm("Törlöd a terméket?")) { await fetch(`${DB_URL}teszta_master/${currentUser.name}/${activeId}/termekek/${currentEditPid}.json`, { method:'DELETE' }); closeModal(); renderCalculation(); } }
     function formatSuly(kg) { return Math.abs(kg) < 1 && kg !== 0 ? (kg * 1000).toFixed(0) + " g" : kg.toFixed(3) + " kg"; }
     function adjLiszt(dir) { manualLisztAdj += (dir * 0.5); renderCalculation(); }
     async function saveNewDough() { const n = document.getElementById('new-dough-name').value; if(!n) return; await fetch(`${DB_URL}teszta_master/${currentUser.name}.json`, { method: 'POST', body: JSON.stringify({name:n, recept:{"liszt":{nev:"Liszt", szazalek:100}}}) }); closeModal(); loadDoughs(); }
